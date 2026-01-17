@@ -84,6 +84,23 @@ h2 {
     border-color: #667eea;
 }
 
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.3s;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
 .criteria-grid {
     display: grid;
     gap: 15px;
@@ -212,6 +229,38 @@ h2 {
     font-size: 18px;
     font-weight: 600;
     color: #667eea;
+}
+
+.opinions-section {
+    margin-top: 15px;
+    padding: 12px;
+    background: #e8f0ff;
+    border-radius: 5px;
+}
+
+.opinions-section h4 {
+    color: #667eea;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.opinions-list {
+    list-style: none;
+    padding: 0;
+}
+
+.opinions-list li {
+    padding: 8px;
+    margin-bottom: 5px;
+    background: white;
+    border-radius: 5px;
+    border-left: 3px solid #667eea;
+    font-size: 14px;
+    color: #333;
+}
+
+.opinions-list li:last-child {
+    margin-bottom: 0;
 }
 
 .empty-state {

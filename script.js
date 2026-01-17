@@ -1,6 +1,12 @@
 // Data storage
 let ratings = JSON.parse(localStorage.getItem('neighborhoodRatings')) || [];
 
+// Voted neighborhoods (stored per browser)
+let votedNeighborhoods = JSON.parse(localStorage.getItem('votedNeighborhoods')) || [];
+
+// Load neighborhoods from JSON
+let neighborhoods = [];
+
 // Criteria configuration
 const criteria = {
     location: 'Локация',
@@ -55,6 +61,13 @@ document.getElementById('ratingForm').addEventListener('submit', (e) => {
     e.preventDefault();
     
     const neighborhood = document.getElementById('neighborhood').value;
+    const opinion = document.getElementById('opinion').value.trim();
+    
+    // Check if already voted for this neighborhood
+    if (votedNeighborhoods.includes(neighborhood)) {
+        showToast('Вече сте гласували за този квартал!', 'error');
+        return;
+    }
     
     // Validate all criteria are rated
     const allRated = Object.values(currentRatings).every(rating => rating > 0);
@@ -68,14 +81,23 @@ document.getElementById('ratingForm').addEventListener('submit', (e) => {
         id: Date.now(),
         neighborhood: neighborhood,
         ratings: { ...currentRatings },
+        opinion: opinion,
         timestamp: new Date().toISOString()
     };
     
     ratings.push(ratingData);
     localStorage.setItem('neighborhoodRatings', JSON.stringify(ratings));
     
+    // Mark as voted
+    votedNeighborhoods.push(neighborhood);
+    localStorage.setItem('votedNeighborhoods', JSON.stringify(votedNeighborhoods));
+    
+    // Disable the voted neighborhood
+    updateNeighborhoodOptions();
+    
     // Reset form
     document.getElementById('ratingForm').reset();
+    document.getElementById('opinion').value = '';
     Object.keys(currentRatings).forEach(key => currentRatings[key] = 0);
     document.querySelectorAll('.stars').forEach(container => {
         container.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
@@ -120,8 +142,23 @@ function displayResults(filter = '') {
         
         const totalAvg = (Object.values(avgRatings).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / 10).toFixed(1);
         
+        // Get opinions
+        const opinions = neighborhoodRatings.filter(r => r.opinion).map(r => r.opinion);
+        
         const card = document.createElement('div');
         card.className = 'neighborhood-card';
+        let opinionHTML = '';
+        if (opinions.length > 0) {
+            opinionHTML = `
+                <div class="opinions-section">
+                    <h4>Мнения:</h4>
+                    <ul class="opinions-list">
+                        ${opinions.map(op => `<li>"${op}"</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
         card.innerHTML = `
             <h3>${neighborhood} (${neighborhoodRatings.length} ${neighborhoodRatings.length === 1 ? 'оценка' : 'оценки'})</h3>
             <div class="rating-grid">
@@ -133,6 +170,7 @@ function displayResults(filter = '') {
                 `).join('')}
             </div>
             <div class="average-score">Среден рейтинг: ${totalAvg} / 5.0 ★</div>
+            ${opinionHTML}
         `;
         container.appendChild(card);
     });
@@ -141,16 +179,6 @@ function displayResults(filter = '') {
 // Filter results
 document.getElementById('filterNeighborhood').addEventListener('change', (e) => {
     displayResults(e.target.value);
-});
-
-// Clear all data
-document.getElementById('clearData').addEventListener('click', () => {
-    if (confirm('Сигурни ли сте, че искате да изтриете всички данни?')) {
-        ratings = [];
-        localStorage.removeItem('neighborhoodRatings');
-        displayResults();
-        showToast('Всички данни са изтрити');
-    }
 });
 
 // Toast notification
@@ -168,5 +196,56 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Update neighborhood select to disable voted ones
+function updateNeighborhoodOptions() {
+    const select = document.getElementById('neighborhood');
+    const options = select.querySelectorAll('option');
+    options.forEach(option => {
+        if (option.value && votedNeighborhoods.includes(option.value)) {
+            option.disabled = true;
+            option.textContent += ' (вече гласували)';
+        }
+    });
+}
+
 // Initial display
+updateNeighborhoodOptions();
 displayResults();
+
+// Load neighborhoods from JSON file
+fetch('neighborhoods.json')
+    .then(response => response.json())
+    .then(data => {
+        neighborhoods = data.neighborhoods;
+        populateSelectOptions();
+    })
+    .catch(err => console.error('Error loading neighborhoods:', err));
+
+// Populate select options dynamically
+function populateSelectOptions() {
+    const select1 = document.getElementById('neighborhood');
+    const select2 = document.getElementById('filterNeighborhood');
+    
+    // Clear existing options (keep the first placeholder option)
+    while (select1.options.length > 1) {
+        select1.remove(1);
+    }
+    while (select2.options.length > 1) {
+        select2.remove(1);
+    }
+    
+    // Add neighborhood options
+    neighborhoods.forEach(neighborhood => {
+        const opt1 = document.createElement('option');
+        opt1.value = neighborhood;
+        opt1.textContent = neighborhood;
+        select1.appendChild(opt1);
+        
+        const opt2 = document.createElement('option');
+        opt2.value = neighborhood;
+        opt2.textContent = neighborhood;
+        select2.appendChild(opt2);
+    });
+    
+    updateNeighborhoodOptions();
+}
