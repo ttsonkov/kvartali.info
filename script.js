@@ -1,8 +1,12 @@
-// Data storage
-let ratings = JSON.parse(localStorage.getItem('neighborhoodRatings')) || [];
+// Firebase setup
+let firebaseApp;
+let db;
+let auth;
+let currentUser = null;
 
-// Voted neighborhoods (stored per browser)
-let votedNeighborhoods = JSON.parse(localStorage.getItem('votedNeighborhoods')) || [];
+// Cloud-backed data caches
+let allRatings = []; // all ratings from Firestore
+let userVotedNeighborhoods = []; // neighborhoods this user has voted
 
 // Load neighborhoods from data
 let neighborhoods = [
@@ -175,54 +179,70 @@ function updateStars(container, rating) {
 }
 
 // Form submission
-document.getElementById('ratingForm').addEventListener('submit', (e) => {
+document.getElementById('ratingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
+    if (!currentUser) {
+        showToast('Моля изчакайте автентикация...', 'error');
+        return;
+    }
+
     const neighborhood = document.getElementById('neighborhood').value;
     const opinion = document.getElementById('opinion').value.trim();
-    
-    // Check if already voted for this neighborhood
-    if (votedNeighborhoods.includes(neighborhood)) {
+
+    // Check if already voted for this neighborhood (server-ground truth)
+    if (userVotedNeighborhoods.includes(neighborhood)) {
         showToast('Вече сте гласували за този квартал!', 'error');
         return;
     }
-    
+
     // Validate all criteria are rated
-    const allRated = Object.values(currentRatings).every(rating => rating > 0);
-    if (!allRated) {
+    const allRatedOk = Object.values(currentRatings).every(rating => rating > 0);
+    if (!allRatedOk) {
         showToast('Моля оценете всички критерии!', 'error');
         return;
     }
-    
-    // Save rating
+
     const ratingData = {
-        id: Date.now(),
         neighborhood: neighborhood,
         ratings: { ...currentRatings },
         opinion: opinion,
+        userId: currentUser.uid,
         timestamp: new Date().toISOString()
     };
-    
-    ratings.push(ratingData);
-    localStorage.setItem('neighborhoodRatings', JSON.stringify(ratings));
-    
-    // Mark as voted
-    votedNeighborhoods.push(neighborhood);
-    localStorage.setItem('votedNeighborhoods', JSON.stringify(votedNeighborhoods));
-    
-    // Disable the voted neighborhood
-    updateNeighborhoodOptions();
-    
-    // Reset form
-    document.getElementById('ratingForm').reset();
-    document.getElementById('opinion').value = '';
-    Object.keys(currentRatings).forEach(key => currentRatings[key] = 0);
-    document.querySelectorAll('.stars').forEach(container => {
-        container.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
-    });
-    
-    showToast('Оценката е запазена успешно!');
-    displayResults();
+
+    // Enforce one vote per user per neighborhood via deterministic doc id
+    const docId = `${neighborhood}__${currentUser.uid}`;
+
+    try {
+        const docRef = db.collection('ratings').doc(docId);
+        const existing = await docRef.get();
+        if (existing.exists) {
+            showToast('Вече сте гласували за този квартал!', 'error');
+            updateNeighborhoodOptions();
+            return;
+        }
+
+        await docRef.set(ratingData);
+
+        // Update local cache of voted neighborhoods for this user
+        userVotedNeighborhoods.push(neighborhood);
+        updateNeighborhoodOptions();
+
+        // Reset form
+        document.getElementById('ratingForm').reset();
+        document.getElementById('opinion').value = '';
+        Object.keys(currentRatings).forEach(key => currentRatings[key] = 0);
+        document.querySelectorAll('.stars').forEach(container => {
+            container.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+        });
+
+        showToast('Оценката е запазена успешно!');
+        // displayResults() is triggered by the Firestore snapshot listener
+    } catch (err) {
+        console.error('Error saving rating:', err);
+        showToast('Грешка при запис на оценката', 'error');
+    }
 });
 
 // Display results
@@ -230,9 +250,9 @@ function displayResults(filter = '') {
     const container = document.getElementById('resultsContainer');
     
     // Filter ratings
-    let filteredRatings = ratings;
+    let filteredRatings = allRatings;
     if (filter) {
-        filteredRatings = ratings.filter(r => r.neighborhood === filter);
+        filteredRatings = allRatings.filter(r => r.neighborhood === filter);
     }
     
     if (filteredRatings.length === 0) {
@@ -319,9 +339,11 @@ function updateNeighborhoodOptions() {
     const select = document.getElementById('neighborhood');
     const options = select.querySelectorAll('option');
     options.forEach(option => {
-        if (option.value && votedNeighborhoods.includes(option.value)) {
+        if (option.value && userVotedNeighborhoods.includes(option.value)) {
             option.disabled = true;
-            option.textContent += ' (вече гласували)';
+            if (!option.textContent.includes('(вече гласували)')) {
+                option.textContent += ' (вече гласували)';
+            }
         }
     });
 }
@@ -355,6 +377,53 @@ function populateSelectOptions() {
     updateNeighborhoodOptions();
 }
 
-// Initial display
-populateSelectOptions();
-displayResults();
+// Firestore live updates for results
+function attachRatingsListener() {
+    db.collection('ratings').onSnapshot(
+        (snapshot) => {
+            allRatings = snapshot.docs.map(doc => doc.data());
+            const currentFilter = document.getElementById('filterNeighborhood').value || '';
+            displayResults(currentFilter);
+        },
+        (error) => {
+            console.error('Snapshot error:', error);
+        }
+    );
+}
+
+// Load neighborhoods voted by this user to enforce one-vote
+async function loadUserVotes() {
+    try {
+        const qs = await db.collection('ratings').where('userId', '==', currentUser.uid).get();
+        userVotedNeighborhoods = qs.docs.map(doc => doc.data().neighborhood);
+        updateNeighborhoodOptions();
+    } catch (err) {
+        console.error('Error loading user votes:', err);
+    }
+}
+
+// Initialize Firebase and start app
+function initFirebase() {
+    try {
+        firebaseApp = firebase.initializeApp(window.firebaseConfig);
+        db = firebase.firestore();
+        auth = firebase.auth();
+        auth.signInAnonymously()
+            .then((result) => {
+                currentUser = result.user;
+                // After auth, load user votes, attach results listener, and populate selects
+                populateSelectOptions();
+                attachRatingsListener();
+                loadUserVotes();
+            })
+            .catch((err) => {
+                console.error('Auth error:', err);
+                showToast('Грешка при автентикация', 'error');
+            });
+    } catch (e) {
+        console.error('Firebase init error:', e);
+        showToast('Грешка при инициализация на Firebase', 'error');
+    }
+}
+
+initFirebase();
