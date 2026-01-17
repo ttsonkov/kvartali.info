@@ -39,6 +39,10 @@ function updateHeaderCity(city) {
 function buildHeaderCityMenu() {
     const menu = document.getElementById('headerCityMenu');
     if (!menu) return;
+    if (!cityList || cityList.length === 0) {
+        console.error('cityList is not defined or empty', cityList);
+        return;
+    }
     menu.innerHTML = '';
     cityList.forEach(city => {
         const btn = document.createElement('button');

@@ -1,5 +1,20 @@
 // Main application logic
 
+// Toast notification (moved here to be available early)
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    if (type === 'error') {
+        toast.style.background = '#dc3545';
+    }
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 let currentCity = "София";
 let currentRatings = {};
 
@@ -129,6 +144,13 @@ function setupEventListeners() {
 
 // Initialize application
 function initApp() {
+    // Verify data is loaded
+    if (!cityNeighborhoods || Object.keys(cityNeighborhoods).length === 0) {
+        console.error('cityNeighborhoods data not loaded', cityNeighborhoods);
+        showToast('Грешка: данните за градовете не са заредени', 'error');
+        return;
+    }
+    
     // Read URL parameters
     const urlParams = getURLParams();
     currentCity = urlParams.city;
