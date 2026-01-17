@@ -148,6 +148,22 @@ function setupEventListeners() {
         applyCitySelection(e.target.value);
     });
 
+    // Neighborhood selector change in form - sync with filter
+    document.getElementById('neighborhood').addEventListener('change', (e) => {
+        const selectedNeighborhood = e.target.value;
+        const currentCity = document.getElementById('citySelect').value;
+        
+        // Update filter neighborhood selector
+        const filterNeighborhood = document.getElementById('filterNeighborhood');
+        if (filterNeighborhood && selectedNeighborhood) {
+            filterNeighborhood.value = selectedNeighborhood;
+            
+            // Update results display
+            displayResults(currentCity, selectedNeighborhood);
+            updateURL(currentCity, selectedNeighborhood);
+        }
+    });
+
     // Filter results
     document.getElementById('filterCity').addEventListener('change', (e) => {
         const city = e.target.value || currentCity;
