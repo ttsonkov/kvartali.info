@@ -4,8 +4,126 @@ let ratings = JSON.parse(localStorage.getItem('neighborhoodRatings')) || [];
 // Voted neighborhoods (stored per browser)
 let votedNeighborhoods = JSON.parse(localStorage.getItem('votedNeighborhoods')) || [];
 
-// Load neighborhoods from JSON
-let neighborhoods = [];
+// Load neighborhoods from data
+let neighborhoods = [
+    "Абдовица",
+    "Аерогара",
+    "Американски колеж",
+    "Банишора",
+    "Барите",
+    "Батареята",
+    "Белите брези",
+    "Бенковски",
+    "Борово",
+    "Ботунец",
+    "Бояна",
+    "Бункера",
+    "Бъкстон",
+    "Витоша",
+    "Военна рампа",
+    "Враждебна",
+    "Връбница-1",
+    "Връбница-2",
+    "Гевгелийски квартал",
+    "Гео Милев",
+    "Горна баня",
+    "Горубляне",
+    "Гоце Делчев",
+    "Група-Зоопарк",
+    "Гърдова глава",
+    "Дианабад",
+    "Димитър Миленков",
+    "Драгалевци",
+    "Дружба 1",
+    "Дружба 2",
+    "Дървеница",
+    "Западен парк",
+    "Захарна фабрика",
+    "Зона Б-18",
+    "Зона Б-19",
+    "Зона Б-5",
+    "Иван Вазов",
+    "Изгрев",
+    "Изток",
+    "Илинден",
+    "Илиянци",
+    "Искър",
+    "Карпузица",
+    "Киноцентъра",
+    "Княжево",
+    "Красна поляна 1",
+    "Красна поляна 2",
+    "Красна поляна 3",
+    "Красно село",
+    "Кремиковци",
+    "Крива река",
+    "Кръстова вада",
+    "Лагера",
+    "Лев Толстой",
+    "Левски В",
+    "Левски Г",
+    "Лозенец",
+    "Люлин vendar",
+    "Люлин 1",
+    "Люлин 2",
+    "Люлин 3",
+    "Люлин 4",
+    "Люлин 5",
+    "Люлин 6",
+    "Люлин 7",
+    "Люлин 8",
+    "Люлин 9",
+    "Люлин 10",
+    "Малинова долина",
+    "Манастирски ливади запад",
+    "Манастирски ливади изток",
+    "Младост 1",
+    "Младост 1А",
+    "Младост 2",
+    "Младост 3",
+    "Младост 4",
+    "Модерно предградие",
+    "Надежда I",
+    "Надежда II",
+    "Надежда III",
+    "Надежда IV",
+    "Обеля",
+    "Обеля 2",
+    "Овча купел 1",
+    "Овча купел 2",
+    "Орландовци",
+    "Подуяне",
+    "Полигона",
+    "Разсадник-Коньовица",
+    "Република",
+    "Света Троица",
+    "Свобода",
+    "Сердика",
+    "Сеславци",
+    "Симеоново",
+    "Славия",
+    "Слатина",
+    "Стрелбище",
+    "Студентски град",
+    "Сухата река",
+    "Суходол",
+    "Требич",
+    "Триъгълника-Надежда",
+    "Факултета",
+    "Филиповци",
+    "Фондови жилища",
+    "Фохар",
+    "Хаджи Димитър",
+    "Хиподрума",
+    "Хладилника",
+    "Христо Ботев",
+    "Христо Смирненски",
+    "Център",
+    "Челопечене",
+    "Чепинско шосе",
+    "Южен парк",
+    "Яворов"
+];
 
 // Criteria configuration
 const criteria = {
@@ -208,19 +326,6 @@ function updateNeighborhoodOptions() {
     });
 }
 
-// Initial display
-updateNeighborhoodOptions();
-displayResults();
-
-// Load neighborhoods from JSON file
-fetch('neighborhoods.json')
-    .then(response => response.json())
-    .then(data => {
-        neighborhoods = data.neighborhoods;
-        populateSelectOptions();
-    })
-    .catch(err => console.error('Error loading neighborhoods:', err));
-
 // Populate select options dynamically
 function populateSelectOptions() {
     const select1 = document.getElementById('neighborhood');
@@ -249,3 +354,7 @@ function populateSelectOptions() {
     
     updateNeighborhoodOptions();
 }
+
+// Initial display
+populateSelectOptions();
+displayResults();
