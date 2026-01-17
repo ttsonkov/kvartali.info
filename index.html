@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оценка на кварталите на София</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏙️ Оценка на кварталите на София</h1>
+            <p>Оценете кварталите по 10 критерия (1-5 звезди)</p>
+        </header>
+
+        <main>
+            <div class="form-section">
+                <h2>Добавяне на оценка</h2>
+                <form id="ratingForm">
+                    <div class="form-group">
+                        <label for="neighborhood">Квартал:</label>
+                        <select id="neighborhood" required>
+                            <option value="">Изберете квартал</option>
+                            <option value="Лозенец">Лозенец</option>
+                            <option value="Център">Център</option>
+                            <option value="Студентски град">Студентски град</option>
+                            <option value="Младост">Младост</option>
+                            <option value="Люлин">Люлин</option>
+                            <option value="Витоша">Витоша</option>
+                            <option value="Овча купел">Овча купел</option>
+                            <option value="Дружба">Дружба</option>
+                            <option value="Борово">Борово</option>
+                            <option value="Манастирски ливади">Манастирски ливади</option>
+                            <option value="Надежда">Надежда</option>
+                            <option value="Красна поляна">Красна поляна</option>
+                        </select>
+                    </div>
+
+                    <div class="criteria-grid">
+                        <div class="criterion">
+                            <label>Локация:</label>
+                            <div class="stars" data-criterion="location"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Чистота:</label>
+                            <div class="stars" data-criterion="cleanliness"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Транспорт:</label>
+                            <div class="stars" data-criterion="transport"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Сграден фонд:</label>
+                            <div class="stars" data-criterion="buildings"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Сигурност:</label>
+                            <div class="stars" data-criterion="security"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Инфраструктура:</label>
+                            <div class="stars" data-criterion="infrastructure"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Училища и ДГ:</label>
+                            <div class="stars" data-criterion="education"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Здравеопазване:</label>
+                            <div class="stars" data-criterion="healthcare"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Магазини:</label>
+                            <div class="stars" data-criterion="shopping"></div>
+                        </div>
+                        <div class="criterion">
+                            <label>Забавления:</label>
+                            <div class="stars" data-criterion="entertainment"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Запази оценката</button>
+                </form>
+            </div>
+
+            <div class="results-section">
+                <h2>Резултати</h2>
+                <div class="filter-bar">
+                    <select id="filterNeighborhood">
+                        <option value="">Всички квартали</option>
+                        <option value="Лозенец">Лозенец</option>
+                        <option value="Център">Център</option>
+                        <option value="Студентски град">Студентски град</option>
+                        <option value="Младост">Младост</option>
+                        <option value="Люлин">Люлин</option>
+                        <option value="Витоша">Витоша</option>
+                        <option value="Овча купел">Овча купел</option>
+                        <option value="Дружба">Дружба</option>
+                        <option value="Борово">Борово</option>
+                        <option value="Манастирски ливади">Манастирски ливади</option>
+                        <option value="Надежда">Надежда</option>
+                        <option value="Красна поляна">Красна поляна</option>
+                    </select>
+                    <button id="clearData" class="btn-danger">Изтрий всички данни</button>
+                </div>
+                <div id="resultsContainer"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
