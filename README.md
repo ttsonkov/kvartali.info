@@ -8,29 +8,6 @@
 - Един глас на квартал/град за потребител (Anonymous Auth)
 - Живи резултати чрез Firestore `onSnapshot`
 - URL синхронизация за шаринг и история на браузъра
-
-## 🔥 Firebase настройка
-1. Firebase Console → Add Project → Firestore Database → Start in production mode.
-2. Authentication → Sign-in method → Anonymous → Enable.
-3. Project Settings → Your apps → Web App → копирайте SDK конфигурацията (apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId).
-4. Поставете ключовете в `firebase-config.js`.
-5. Firestore правила (четене: всички; създаване: само автентикирани; без редакции/изтривания):
-
-```
-rules_version = '2';
-service cloud.firestore {
-   match /databases/{database}/documents {
-      match /ratings/{docId} {
-         allow read: if true;
-         allow create: if request.auth != null
-                              && request.resource.data.userId == request.auth.uid
-                              && resource == null;
-         allow update, delete: if false;
-      }
-   }
-}
-```
-
 ## 🧪 Локален тест
 - Отворете `index.html` директно или чрез локален сървър и изпратете оценка. Трябва да видите обновени резултати и блокирана опция за вече гласувания квартал.
 
