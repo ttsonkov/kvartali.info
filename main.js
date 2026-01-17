@@ -18,6 +18,58 @@ function showToast(message, type = 'success') {
 let currentCity = "София";
 let currentRatings = {};
 
+// Fallback data in case data.js fails to load
+if (typeof cityNeighborhoods === 'undefined') {
+    console.warn('data.js not loaded, using fallback data');
+    window.cityNeighborhoods = {
+        "София": ["Център", "Младост", "Люлин", "Надежда"],
+        "Пловдив": ["Център", "Капана", "Гладно поле", "Западен"],
+        "Варна": ["Център", "Морска гара", "Младост", "Бриз"],
+        "Бургас": ["Море", "Море", "Песчаница", "Разград"],
+        "Благоевград": ["Артизан", "Варошин"],
+        "Велико Търново": ["Младост", "Парк"],
+        "Габрово": ["Артизан", "Младост"],
+        "Добрич": ["Артизан", "Младост"],
+        "Видин": ["Артизан", "Младост"],
+        "Враца": ["Артизан", "Младост"],
+        "Разград": ["Артизан", "Младост"],
+        "Русе": ["Алеи Възраждане", "Възраждане"],
+        "Кюстендил": ["Артизан", "Младост"],
+        "Монтана": ["Артизан", "Младост"],
+        "Пазарджик": ["Артизан", "Младост"],
+        "Перник": ["Артизан", "Младост"],
+        "Плевен": ["Център", "Младост"],
+        "Сливен": ["Артизан", "Младост"],
+        "Смолян": ["Артизан", "Младост"],
+        "Стара Загора": ["Център", "Младост"],
+        "Търговище": ["Артизан", "Младост"],
+        "Хасково": ["Артизан", "Младост"],
+        "Шумен": ["Артизан", "Младост"]
+    };
+}
+
+// Ensure criteria is defined
+if (typeof criteria === 'undefined') {
+    console.warn('data.js criteria not loaded, using fallback');
+    window.criteria = {
+        location: 'Локация',
+        cleanliness: 'Чистота',
+        transport: 'Транспорт',
+        buildings: 'Сграден фонд',
+        security: 'Сигурност',
+        infrastructure: 'Инфраструктура',
+        education: 'Училища и ДГ',
+        healthcare: 'Здравеопазване',
+        shopping: 'Магазини',
+        entertainment: 'Забавления'
+    };
+}
+
+// Ensure allNeighborhoods is defined
+if (typeof allNeighborhoods === 'undefined') {
+    window.allNeighborhoods = Object.values(cityNeighborhoods).flat();
+}
+
 // Helper functions
 const makeVoteKey = (city, neighborhood) => `${city || 'София'}::${neighborhood}`;
 

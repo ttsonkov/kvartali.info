@@ -39,12 +39,17 @@ function updateHeaderCity(city) {
 function buildHeaderCityMenu() {
     const menu = document.getElementById('headerCityMenu');
     if (!menu) return;
-    if (!cityList || cityList.length === 0) {
-        console.error('cityList is not defined or empty', cityList);
+    
+    // Get cityList from cityNeighborhoods object
+    const cities = Object.keys(cityNeighborhoods || {});
+    
+    if (!cities || cities.length === 0) {
+        console.error('No cities found in cityNeighborhoods', cityNeighborhoods);
         return;
     }
+    
     menu.innerHTML = '';
-    cityList.forEach(city => {
+    cities.forEach(city => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.textContent = city;
