@@ -501,12 +501,12 @@ function updateNeighborhoodOptions() {
         const key = makeVoteKey(city, option.value);
         if (userVotedNeighborhoods.includes(key)) {
             option.disabled = true;
-            if (!option.textContent.includes('(вече гласували)')) {
-                option.textContent += ' (вече гласували)';
+            if (!option.textContent.includes('(Вече сте гласували)')) {
+                option.textContent += ' (Вече сте гласували)';
             }
         } else {
             option.disabled = false;
-            option.textContent = option.textContent.replace(' (вече гласували)', '');
+            option.textContent = option.textContent.replace(' (Вече сте гласували)', '');
         }
     });
 }
