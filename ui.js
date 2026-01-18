@@ -87,7 +87,7 @@ function updateNeighborhoodOptions() {
     const options = select.querySelectorAll('option');
     options.forEach(option => {
         if (!option.value) return;
-        const key = makeVoteKey(city, option.value);
+        const key = makeVoteKey(city, option.value, currentLocationType);
         if (userVotedNeighborhoods.includes(key)) {
             option.disabled = true;
             if (!option.textContent.includes('(Вече сте гласували)')) {
@@ -105,8 +105,10 @@ function populateSelectOptions(formCity = currentCity, filterCity = document.get
     const select1 = document.getElementById('neighborhood');
     const select2 = document.getElementById('filterNeighborhood');
 
-    const formNeighborhoods = getNeighborhoodsForCity(formCity);
-    const filterNeighborhoods = getNeighborhoodsForCity(filterCity);
+    // Choose data source based on location type
+    const dataSource = currentLocationType === 'childcare' ? childcareNeighborhoods : cityNeighborhoods;
+    const formNeighborhoods = dataSource[formCity] || [];
+    const filterNeighborhoods = dataSource[filterCity] || [];
 
     // Clear existing options (keep the first placeholder option)
     while (select1.options.length > 1) {
@@ -139,6 +141,10 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
     
     // Filter ratings
     let filteredRatings = allRatings;
+    
+    // Filter by location type
+    filteredRatings = filteredRatings.filter(r => (r.locationType || 'neighborhood') === currentLocationType);
+    
     if (cityFilter) {
         filteredRatings = filteredRatings.filter(r => (r.city || 'София') === cityFilter);
     }
@@ -163,18 +169,29 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
     // Sort neighborhoods by total average descending
     const sortedEntries = Object.entries(grouped).map(([neighborhood, neighborhoodRatings]) => {
         const city = neighborhoodRatings[0]?.city || 'София';
+        const locationType = neighborhoodRatings[0]?.locationType || 'neighborhood';
         const avgRatings = {};
-        Object.keys(criteria).forEach(criterion => {
-            const sum = neighborhoodRatings.reduce((acc, r) => acc + r.ratings[criterion], 0);
-            avgRatings[criterion] = (sum / neighborhoodRatings.length).toFixed(1);
-        });
-        const totalAvg = (Object.values(avgRatings).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / 10).toFixed(1);
-        return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg: parseFloat(totalAvg) };
+        
+        if (locationType === 'childcare') {
+            // For childcare: only 'overall' rating
+            const sum = neighborhoodRatings.reduce((acc, r) => acc + (r.ratings.overall || 0), 0);
+            avgRatings.overall = (sum / neighborhoodRatings.length).toFixed(1);
+            const totalAvg = parseFloat(avgRatings.overall);
+            return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg, locationType };
+        } else {
+            // For neighborhoods: 10 criteria
+            Object.keys(criteria).forEach(criterion => {
+                const sum = neighborhoodRatings.reduce((acc, r) => acc + (r.ratings[criterion] || 0), 0);
+                avgRatings[criterion] = (sum / neighborhoodRatings.length).toFixed(1);
+            });
+            const totalAvg = (Object.values(avgRatings).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / 10).toFixed(1);
+            return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg: parseFloat(totalAvg), locationType };
+        }
     }).sort((a, b) => b.totalAvg - a.totalAvg);
 
     // Build HTML
     container.innerHTML = '';
-    sortedEntries.forEach(({ neighborhood, city, neighborhoodRatings, avgRatings, totalAvg }) => {
+    sortedEntries.forEach(({ neighborhood, city, neighborhoodRatings, avgRatings, totalAvg, locationType }) => {
         const opinions = neighborhoodRatings.filter(r => r.opinion).map(r => r.opinion);
         const card = document.createElement('div');
         card.className = 'neighborhood-card';
@@ -206,15 +223,30 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
             `;
         }
         
+        // Build rating grid based on type
+        let ratingGridHTML = '';
+        if (locationType === 'childcare') {
+            // For childcare: show only overall rating
+            ratingGridHTML = `
+                <div class="rating-item">
+                    <span>Оценка:</span>
+                    <span>${avgRatings.overall} ★</span>
+                </div>
+            `;
+        } else {
+            // For neighborhoods: show all 10 criteria
+            ratingGridHTML = Object.entries(criteria).map(([key, name]) => `
+                <div class="rating-item">
+                    <span>${name}:</span>
+                    <span>${avgRatings[key]} ★</span>
+                </div>
+            `).join('');
+        }
+        
         card.innerHTML = `
             <h3>${neighborhood} — ${city} (${neighborhoodRatings.length} ${neighborhoodRatings.length === 1 ? 'оценка' : 'оценки'})</h3>
             <div class="rating-grid">
-                ${Object.entries(criteria).map(([key, name]) => `
-                    <div class="rating-item">
-                        <span>${name}:</span>
-                        <span>${avgRatings[key]} ★</span>
-                    </div>
-                `).join('')}
+                ${ratingGridHTML}
             </div>
             <div class="average-score">Среден рейтинг: ${totalAvg.toFixed(1)} / 5.0 ★</div>
             ${opinionHTML}

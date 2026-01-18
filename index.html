@@ -9,13 +9,19 @@
 <body>
     <div class="container">
         <header>
-            <h1 id="pageTitle">
-                <span>🏙️ КварталБГ:</span>
-                <span style="position: relative; display: inline-block;">
-                    <a href="#citySelect" id="headerCityLink">София</a>
-                    <div id="headerCityMenu" class="city-menu hidden"></div>
-                </span>
-            </h1>
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <h1 id="pageTitle" style="margin: 0;">
+                    <span>🏙️ КварталБГ:</span>
+                    <span style="position: relative; display: inline-block;">
+                        <a href="#citySelect" id="headerCityLink">София</a>
+                        <div id="headerCityMenu" class="city-menu hidden"></div>
+                    </span>
+                </h1>
+                <div class="location-type-toggle">
+                    <button type="button" id="btnNeighborhoods" class="toggle-btn active">Квартали</button>
+                    <button type="button" id="btnChildcare" class="toggle-btn">Детски градини</button>
+                </div>
+            </div>
             <p>Оценете кварталите на всички областни градове по 10 критерия (1-5 звезди) - по един глас на квартал</p>
         </header>
 
@@ -54,13 +60,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="neighborhood">Квартал:</label>
+                        <label for="neighborhood" id="neighborhoodLabel">Квартал:</label>
                         <select id="neighborhood" required>
-                            <option value="">Изберете квартал...</option>
+                            <option value="" id="neighborhoodPlaceholder">Изберете квартал...</option>
                         </select>
                     </div>
 
-                    <div class="criteria-grid">
+                    <!-- Criteria for neighborhoods (10 criteria) -->
+                    <div class="criteria-grid" id="neighborhoodCriteria">
                         <div class="criterion">
                             <label>Локация:</label>
                             <div class="stars" data-criterion="location"></div>
@@ -103,8 +110,16 @@
                         </div>
                     </div>
 
+                    <!-- Single rating for childcare facilities -->
+                    <div class="criteria-grid" id="childcareCriteria" style="display: none;">
+                        <div class="criterion">
+                            <label>Оценка:</label>
+                            <div class="stars" data-criterion="overall"></div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
-                        <label for="opinion">Мнение (опционално):</label>
+                        <label for="opinion" id="opinionLabel">Мнение (опционално):</label>
                         <textarea id="opinion" placeholder="Напишете вашето мнение за квартала..."></textarea>
                     </div>
 
@@ -142,7 +157,7 @@
                         <option value="Шумен">Шумен</option>
                     </select>
                     <select id="filterNeighborhood">
-                        <option value="">Всички квартали</option>
+                        <option value="" id="filterNeighborhoodPlaceholder">Всички квартали</option>
                     </select>
                 </div>
                 <div id="resultsContainer"></div>

@@ -31,7 +31,8 @@ async function loadUserVotes() {
         const qs = await db.collection('ratings').where('userId', '==', currentUser.uid).get();
         userVotedNeighborhoods = qs.docs.map(doc => {
             const data = doc.data();
-            return makeVoteKey(data.city || 'София', data.neighborhood);
+            const locationType = data.locationType || 'neighborhood';
+            return makeVoteKey(data.city || 'София', data.neighborhood, locationType);
         });
         updateNeighborhoodOptions();
     } catch (err) {
@@ -99,20 +100,29 @@ async function handleFormSubmit(e) {
     const opinion = document.getElementById('opinion').value.trim();
 
     // Check if already voted for this neighborhood (server-ground truth)
-    const voteKey = makeVoteKey(city, neighborhood);
+    const voteKey = makeVoteKey(city, neighborhood, currentLocationType);
     if (userVotedNeighborhoods.includes(voteKey)) {
-        showToast('Вече сте гласували за този квартал!', 'error');
+        const message = currentLocationType === 'childcare' 
+            ? 'Вече сте гласували за тази детска градина!' 
+            : 'Вече сте гласували за този квартал!';
+        showToast(message, 'error');
         return;
     }
 
     // Check if at least something is provided (ratings or opinion)
     const ratingValues = Object.values(currentRatings);
     const ratedCount = ratingValues.filter(rating => rating > 0).length;
-    const allRated = ratedCount === 10;
+    
+    // For childcare: need 1 rating (overall), for neighborhoods: need all 10
+    const expectedCriteria = currentLocationType === 'childcare' ? 1 : 10;
+    const allRated = ratedCount === expectedCriteria;
     const noneRated = ratedCount === 0;
     
     if (!allRated && !noneRated) {
-        showToast('Моля оценете всички 10 критерия или не оценявайте нито един!', 'error');
+        const message = currentLocationType === 'childcare'
+            ? 'Моля оценете или не оценявайте нито едно!'
+            : 'Моля оценете всички 10 критерия или не оценявайте нито един!';
+        showToast(message, 'error');
         return;
     }
     
@@ -124,6 +134,7 @@ async function handleFormSubmit(e) {
     const ratingData = {
         city: city,
         neighborhood: neighborhood,
+        locationType: currentLocationType,
         ratings: { ...currentRatings },
         opinion: opinion,
         userId: currentUser.uid,
@@ -131,8 +142,8 @@ async function handleFormSubmit(e) {
     };
 
     // Enforce one vote per user per neighborhood via deterministic doc id
-    // Encode city and neighborhood to handle special characters
-    const docId = `${encodeURIComponent(city)}__${encodeURIComponent(neighborhood)}__${currentUser.uid}`;
+    // Include locationType in the ID to keep childcare and neighborhood ratings separate
+    const docId = `${encodeURIComponent(currentLocationType)}__${encodeURIComponent(city)}__${encodeURIComponent(neighborhood)}__${currentUser.uid}`;
 
     try {
         const docRef = db.collection('ratings').doc(docId);

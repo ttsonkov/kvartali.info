@@ -17,6 +17,10 @@ function showToast(message, type = 'success') {
 
 let currentCity = "София";
 let currentRatings = {};
+let currentLocationType = "neighborhood"; // 'neighborhood' or 'childcare'
+
+// Vote key includes location type to distinguish childcare from neighborhoods
+const makeVoteKey = (city, neighborhood, type = "neighborhood") => `${type}::${city || 'София'}::${neighborhood}`;
 
 // Fallback data in case data.js fails to load
 if (typeof cityNeighborhoods === 'undefined') {
@@ -70,29 +74,38 @@ if (typeof allNeighborhoods === 'undefined') {
     window.allNeighborhoods = Object.values(cityNeighborhoods).flat();
 }
 
-// Helper functions
-const makeVoteKey = (city, neighborhood) => `${city || 'София'}::${neighborhood}`;
+// Ensure childcareNeighborhoods fallback
+if (typeof childcareNeighborhoods === 'undefined') {
+    console.warn('childcareNeighborhoods not loaded, using empty fallback');
+    window.childcareNeighborhoods = {};
+    Object.keys(cityNeighborhoods).forEach(city => {
+        window.childcareNeighborhoods[city] = [];
+    });
+}
 
+// Helper functions
 const getNeighborhoodsForCity = (city) => {
     if (!city) return allNeighborhoods;
     return cityNeighborhoods[city] || [];
 };
 
 // URL management
-function updateURL(city, neighborhood = '') {
+function updateURL(city, neighborhood = '', type = 'neighborhood') {
     const params = new URLSearchParams();
     if (city) params.set('city', city);
     if (neighborhood) params.set('neighborhood', neighborhood);
+    if (type && type !== 'neighborhood') params.set('type', type);
     
     const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
-    window.history.pushState({ city, neighborhood }, '', newURL);
+    window.history.pushState({ city, neighborhood, type }, '', newURL);
 }
 
 function getURLParams() {
     const params = new URLSearchParams(window.location.search);
     return {
         city: params.get('city') || 'София',
-        neighborhood: params.get('neighborhood') || ''
+        neighborhood: params.get('neighborhood') || '',
+        type: params.get('type') || 'neighborhood'
     };
 }
 
@@ -116,7 +129,64 @@ function applyCitySelection(city) {
     hideHeaderMenu();
     
     // Update URL
-    updateURL(newCity, currentNeighborhoodFilter);
+    updateURL(newCity, currentNeighborhoodFilter, currentLocationType);
+}
+
+// Switch between neighborhoods and childcare facilities
+function setLocationType(type) {
+    console.log('setLocationType called with:', type);
+    currentLocationType = type;
+    console.log('currentLocationType is now:', currentLocationType);
+    
+    // Update button states
+    document.getElementById('btnNeighborhoods').classList.toggle('active', type === 'neighborhood');
+    document.getElementById('btnChildcare').classList.toggle('active', type === 'childcare');
+    
+    // Update form labels and placeholders
+    const neighborhoodLabel = document.getElementById('neighborhoodLabel');
+    const neighborhoodPlaceholder = document.getElementById('neighborhoodPlaceholder');
+    const filterNeighborhoodPlaceholder = document.getElementById('filterNeighborhoodPlaceholder');
+    const opinionTextarea = document.getElementById('opinion');
+    
+    if (type === 'childcare') {
+        neighborhoodLabel.textContent = 'Детска градина/ясла:';
+        neighborhoodPlaceholder.textContent = 'Изберете детска градина...';
+        filterNeighborhoodPlaceholder.textContent = 'Всички детски градини';
+        opinionTextarea.placeholder = 'Напишете вашето мнение за детската градина...';
+        // Show childcare criteria, hide neighborhood criteria
+        document.getElementById('neighborhoodCriteria').style.display = 'none';
+        document.getElementById('childcareCriteria').style.display = 'grid';
+    } else {
+        neighborhoodLabel.textContent = 'Квартал:';
+        neighborhoodPlaceholder.textContent = 'Изберете квартал...';
+        filterNeighborhoodPlaceholder.textContent = 'Всички квартали';
+        opinionTextarea.placeholder = 'Напишете вашето мнение за квартала...';
+        // Show neighborhood criteria, hide childcare criteria
+        document.getElementById('neighborhoodCriteria').style.display = 'grid';
+        document.getElementById('childcareCriteria').style.display = 'none';
+    }
+    
+    // Repopulate neighborhood/childcare selectors
+    const city = document.getElementById('citySelect').value || currentCity;
+    console.log('Repopulating for city:', city, 'with type:', type);
+    populateSelectOptions(city, city);
+    
+    // Clear form
+    document.getElementById('neighborhood').value = '';
+    document.getElementById('filterNeighborhood').value = '';
+    currentRatings = {};
+    document.querySelectorAll('.stars span').forEach(star => star.classList.remove('active'));
+    
+    // Refresh results with current filter city
+    const filterCity = document.getElementById('filterCity')?.value || city;
+    console.log('Displaying results for city:', filterCity);
+    displayResults(filterCity, '');
+    
+    // Update neighborhood options based on votes
+    
+        // Update URL with new type
+        updateURL(filterCity, '', type);
+    updateNeighborhoodOptions();
 }
 
 // Initialize star ratings
@@ -143,6 +213,24 @@ function initStarRatings() {
 
 // Event listeners setup
 function setupEventListeners() {
+    // Location type toggle buttons
+    const btnNeighborhoods = document.getElementById('btnNeighborhoods');
+    const btnChildcare = document.getElementById('btnChildcare');
+    
+    if (btnNeighborhoods) {
+        btnNeighborhoods.addEventListener('click', () => {
+            console.log('Switching to neighborhoods');
+            setLocationType('neighborhood');
+        });
+    }
+    
+    if (btnChildcare) {
+        btnChildcare.addEventListener('click', () => {
+            console.log('Switching to childcare');
+            setLocationType('childcare');
+        });
+    }
+
     // City selector change
     document.getElementById('citySelect').addEventListener('change', (e) => {
         applyCitySelection(e.target.value);
@@ -204,6 +292,9 @@ function setupEventListeners() {
     // Handle browser back/forward buttons
     window.addEventListener('popstate', (e) => {
         const urlParams = getURLParams();
+                if (urlParams.type && urlParams.type !== currentLocationType) {
+                    setLocationType(urlParams.type);
+                }
         applyCitySelection(urlParams.city);
         if (urlParams.neighborhood) {
             const filterSelect = document.getElementById('filterNeighborhood');
@@ -231,6 +322,11 @@ function initApp() {
     const urlParams = getURLParams();
     currentCity = urlParams.city;
     
+        // Set location type from URL if present
+        if (urlParams.type && urlParams.type !== 'neighborhood') {
+            currentLocationType = urlParams.type;
+        }
+    
     // Set city selector to current city
     const citySelect = document.getElementById('citySelect');
     if (citySelect) {
@@ -247,6 +343,11 @@ function initApp() {
     populateSelectOptions(currentCity, currentCity);
     updateHeaderCity(currentCity);
     setupEventListeners();
+    
+        // Apply location type from URL after UI is set up
+        if (urlParams.type === 'childcare') {
+            setLocationType('childcare');
+        }
     
     // Wait for Firebase SDK to load
     if (typeof firebase !== 'undefined') {
