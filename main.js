@@ -147,12 +147,16 @@ function setLocationType(type) {
     const neighborhoodPlaceholder = document.getElementById('neighborhoodPlaceholder');
     const filterNeighborhoodPlaceholder = document.getElementById('filterNeighborhoodPlaceholder');
     const opinionTextarea = document.getElementById('opinion');
+    const headerSubtitle = document.getElementById('headerSubtitle');
     
     if (type === 'childcare') {
         neighborhoodLabel.textContent = 'Детска градина/ясла:';
         neighborhoodPlaceholder.textContent = 'Изберете детска градина...';
         filterNeighborhoodPlaceholder.textContent = 'Всички детски градини';
         opinionTextarea.placeholder = 'Напишете вашето мнение за детската градина...';
+        if (headerSubtitle) {
+            headerSubtitle.textContent = 'Оцени детските градини и ясли и дай мнение за тях.';
+        }
         // Show childcare criteria, hide neighborhood criteria
         document.getElementById('neighborhoodCriteria').style.display = 'none';
         document.getElementById('childcareCriteria').style.display = 'grid';
@@ -161,6 +165,9 @@ function setLocationType(type) {
         neighborhoodPlaceholder.textContent = 'Изберете квартал...';
         filterNeighborhoodPlaceholder.textContent = 'Всички квартали';
         opinionTextarea.placeholder = 'Напишете вашето мнение за квартала...';
+        if (headerSubtitle) {
+            headerSubtitle.textContent = 'Оценете кварталите на всички областни градове по 10 критерия';
+        }
         // Show neighborhood criteria, hide childcare criteria
         document.getElementById('neighborhoodCriteria').style.display = 'grid';
         document.getElementById('childcareCriteria').style.display = 'none';
@@ -183,10 +190,10 @@ function setLocationType(type) {
     displayResults(filterCity, '');
     
     // Update neighborhood options based on votes
-    
-        // Update URL with new type
-        updateURL(filterCity, '', type);
     updateNeighborhoodOptions();
+    
+    // Update URL with new type
+    updateURL(filterCity, '', type);
 }
 
 // Initialize star ratings
