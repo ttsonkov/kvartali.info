@@ -12,6 +12,7 @@ const EventHandlers = {
     setupLocationTypeButtons() {
         const btnNeighborhoods = Utils.getElement('btnNeighborhoods');
         const btnChildcare = Utils.getElement('btnChildcare');
+        const btnDoctors = Utils.getElement('btnDoctors');
         
         if (btnNeighborhoods) {
             btnNeighborhoods.addEventListener('click', () => {
@@ -22,6 +23,12 @@ const EventHandlers = {
         if (btnChildcare) {
             btnChildcare.addEventListener('click', () => {
                 AppController.setLocationType('childcare');
+            });
+        }
+        
+        if (btnDoctors) {
+            btnDoctors.addEventListener('click', () => {
+                AppController.setLocationType('doctors');
             });
         }
     },

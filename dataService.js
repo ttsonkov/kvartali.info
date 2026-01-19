@@ -60,6 +60,7 @@ const DataService = {
     },
     
     getNeighborhoodsForCity(city, type = 'neighborhood') {
+        if (type === 'doctors') return []; // Doctors don't use predefined list
         if (!city) return type === 'childcare' ? [] : allNeighborhoods;
         const source = type === 'childcare' ? childcareNeighborhoods : cityNeighborhoods;
         return source[city] || [];

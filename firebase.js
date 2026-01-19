@@ -96,15 +96,40 @@ async function handleFormSubmit(e) {
 
     const city = Utils.getElementValue('citySelect') || AppState.getCity();
     AppState.setCity(city);
-    const neighborhood = Utils.getElementValue('neighborhood');
+    const locationType = AppState.getLocationType();
+    let neighborhood = '';
+    
+    // Get neighborhood based on location type
+    if (locationType === 'doctors') {
+        const doctorName = Utils.getElementValue('doctorName');
+        const specialty = Utils.getElementValue('specialty');
+        console.log('Doctor data:', { doctorName, specialty });
+        if (!doctorName || !specialty) {
+            Utils.showToast('Моля въведете име на лекар и специалност!', 'error');
+            return;
+        }
+        neighborhood = `${doctorName} (${specialty})`;
+    } else {
+        neighborhood = Utils.getElementValue('neighborhood');
+        if (!neighborhood) {
+            const message = locationType === 'childcare' 
+                ? 'Моля изберете детска градина!' 
+                : 'Моля изберете квартал!';
+            Utils.showToast(message, 'error');
+            return;
+        }
+    }
+    
     const opinion = Utils.getElementValue('opinion')?.trim() || '';
 
     // Check if already voted for this neighborhood (server-ground truth)
-    const voteKey = Utils.makeVoteKey(city, neighborhood, AppState.getLocationType());
+    const voteKey = Utils.makeVoteKey(city, neighborhood, locationType);
     if (userVotedNeighborhoods.includes(voteKey)) {
-        const message = AppState.getLocationType() === 'childcare' 
-            ? 'Вече сте гласували за тази детска градина!' 
-            : 'Вече сте гласували за този квартал!';
+        const message = locationType === 'doctors' 
+            ? 'Вече сте гласували за този лекар!'
+            : (locationType === 'childcare' 
+                ? 'Вече сте гласували за тази детска градина!' 
+                : 'Вече сте гласували за този квартал!');
         Utils.showToast(message, 'error');
         return;
     }
@@ -114,13 +139,15 @@ async function handleFormSubmit(e) {
     const ratingValues = Object.values(ratings);
     const ratedCount = ratingValues.filter(rating => rating > 0).length;
     
-    // For childcare: need 1 rating (overall), for neighborhoods: need all 10
-    const expectedCriteria = AppState.getLocationType() === 'childcare' ? 1 : 10;
+    console.log('Submitting rating:', { locationType, ratings, ratingValues, ratedCount });
+    
+    // For childcare and doctors: need 1 rating (overall), for neighborhoods: need all 10
+    const expectedCriteria = (locationType === 'childcare' || locationType === 'doctors') ? 1 : 10;
     const allRated = ratedCount === expectedCriteria;
     const noneRated = ratedCount === 0;
     
     if (!allRated && !noneRated) {
-        const message = AppState.getLocationType() === 'childcare'
+        const message = (locationType === 'childcare' || locationType === 'doctors')
             ? 'Моля оценете или не оценявайте нито едно!'
             : 'Моля оценете всички 10 критерия или не оценявайте нито един!';
         Utils.showToast(message, 'error');
@@ -150,7 +177,12 @@ async function handleFormSubmit(e) {
         const docRef = db.collection('ratings').doc(docId);
         const existing = await docRef.get();
         if (existing.exists) {
-            Utils.showToast('Вече сте гласували за този квартал!', 'error');
+            const message = locationType === 'doctors' 
+                ? 'Вече сте гласували за този лекар!'
+                : (locationType === 'childcare' 
+                    ? 'Вече сте гласували за тази детска градина!' 
+                    : 'Вече сте гласували за този квартал!');
+            Utils.showToast(message, 'error');
             updateNeighborhoodOptions();
             return;
         }
@@ -168,13 +200,15 @@ async function handleFormSubmit(e) {
         UIController.updateCityDisplay(city);
         // Repopulate options for the preserved city context
         try {
-            populateSelectOptions(city, city);
-            updateNeighborhoodOptions();
-            // Preserve selected neighborhood in both form and filter
-            UIController.updateNeighborhoodDisplay(neighborhood);
+            if (locationType !== 'doctors') {
+                populateSelectOptions(city, city);
+                updateNeighborhoodOptions();
+                // Preserve selected neighborhood in both form and filter
+                UIController.updateNeighborhoodDisplay(neighborhood);
+            }
             // Refresh results and URL
-            displayResults(city, neighborhood || '');
-            Utils.updateURL(city, neighborhood || '', AppState.getLocationType());
+            displayResults(city, '');
+            Utils.updateURL(city, '', locationType);
         } catch (e) {
             console.warn('Post-save UI refresh warning:', e);
         }

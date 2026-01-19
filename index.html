@@ -67,6 +67,7 @@
                 <div class="location-type-toggle">
                     <button type="button" id="btnNeighborhoods" class="toggle-btn active">Квартали</button>
                     <button type="button" id="btnChildcare" class="toggle-btn">Детски градини</button>
+                    <button type="button" id="btnDoctors" class="toggle-btn">Лекари</button>
                 </div>
             </div>
             <p id="headerSubtitle">Оценете кварталите на всички областни градове по 10 критерия (1-5 звезди) - по един глас на квартал</p>
@@ -81,6 +82,20 @@
                         <label for="neighborhood" id="neighborhoodLabel">Квартал:</label>
                         <select id="neighborhood" required>
                             <option value="" id="neighborhoodPlaceholder">Изберете квартал...</option>
+                        </select>
+                    </div>
+
+                    <!-- Doctor name field (for doctors mode) -->
+                    <div class="form-group" id="doctorNameGroup" style="display: none;">
+                        <label for="doctorName">Име на лекар:</label>
+                        <textarea id="doctorName" rows="1" placeholder="Въведете име на лекар..."></textarea>
+                    </div>
+
+                    <!-- Medical specialty selector (for doctors mode) -->
+                    <div class="form-group" id="specialtyGroup" style="display: none;">
+                        <label for="specialty">Специалност:</label>
+                        <select id="specialty">
+                            <option value="">Изберете специалност...</option>
                         </select>
                     </div>
 
@@ -146,7 +161,7 @@
             </section>
 
             <section class="results-section" aria-labelledby="results-heading">
-                <h2 id="results-heading">Резултати и оценки</h2>
+                <h2 id="results-heading">Резултати и мнения</h2>
                 <div class="filter-bar">
                     <select id="filterNeighborhood">
                         <option value="" id="filterNeighborhoodPlaceholder">Всички квартали</option>

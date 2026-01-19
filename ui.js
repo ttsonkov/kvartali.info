@@ -90,6 +90,11 @@ function populateSelectOptions(formCity = AppState.getCity(), filterCity = Utils
     const select1 = Utils.getElement('neighborhood');
     const select2 = Utils.getElement('filterNeighborhood');
 
+    // Skip populating if in doctors mode
+    if (AppState.getLocationType() === 'doctors') {
+        return;
+    }
+
     // Get neighborhoods from DataService based on location type
     const formNeighborhoods = DataService.getNeighborhoodsForCity(formCity, AppState.getLocationType());
     const filterNeighborhoods = DataService.getNeighborhoodsForCity(filterCity, AppState.getLocationType());
@@ -132,7 +137,16 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
     // Always filter by current city
     const city = cityFilter || AppState.getCity();
     filteredRatings = filteredRatings.filter(r => (r.city || 'София') === city);
-    if (neighborhoodFilter) {
+    
+    // For doctors mode, filter by specialty if specified
+    if (AppState.getLocationType() === 'doctors' && neighborhoodFilter) {
+        filteredRatings = filteredRatings.filter(r => {
+            // Extract specialty from "Name (Specialty)" format
+            const match = r.neighborhood.match(/\(([^)]+)\)$/);
+            const specialty = match ? match[1] : '';
+            return specialty === neighborhoodFilter;
+        });
+    } else if (neighborhoodFilter) {
         filteredRatings = filteredRatings.filter(r => r.neighborhood === neighborhoodFilter);
     }
     
@@ -156,12 +170,19 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
         const locationType = neighborhoodRatings[0]?.locationType || 'neighborhood';
         const avgRatings = {};
         
-        if (locationType === 'childcare') {
-            // For childcare: only 'overall' rating
+        // Extract specialty for doctors (from "Name (Specialty)" format)
+        let specialty = '';
+        if (locationType === 'doctors') {
+            const match = neighborhood.match(/\(([^)]+)\)$/);
+            specialty = match ? match[1] : '';
+        }
+        
+        if (locationType === 'childcare' || locationType === 'doctors') {
+            // For childcare and doctors: only 'overall' rating
             const sum = neighborhoodRatings.reduce((acc, r) => acc + (r.ratings.overall || 0), 0);
             avgRatings.overall = (sum / neighborhoodRatings.length).toFixed(1);
             const totalAvg = parseFloat(avgRatings.overall);
-            return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg, locationType };
+            return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg, locationType, specialty };
         } else {
             // For neighborhoods: 10 criteria
             Object.keys(criteria).forEach(criterion => {
@@ -169,9 +190,17 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
                 avgRatings[criterion] = (sum / neighborhoodRatings.length).toFixed(1);
             });
             const totalAvg = (Object.values(avgRatings).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / 10).toFixed(1);
-            return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg: parseFloat(totalAvg), locationType };
+            return { neighborhood, city, neighborhoodRatings, avgRatings, totalAvg: parseFloat(totalAvg), locationType, specialty };
         }
-    }).sort((a, b) => b.totalAvg - a.totalAvg);
+    }).sort((a, b) => {
+        // For doctors, sort by specialty first, then by rating
+        if (a.locationType === 'doctors' && b.locationType === 'doctors') {
+            if (a.specialty !== b.specialty) {
+                return a.specialty.localeCompare(b.specialty, 'bg');
+            }
+        }
+        return b.totalAvg - a.totalAvg;
+    });
 
     // Build HTML
     container.innerHTML = '';
@@ -209,8 +238,8 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
         
         // Build rating grid based on type
         let ratingGridHTML = '';
-        if (locationType === 'childcare') {
-            // For childcare: show only overall rating
+        if (locationType === 'childcare' || locationType === 'doctors') {
+            // For childcare and doctors: show only overall rating
             ratingGridHTML = `
                 <div class="rating-item">
                     <span>Оценка:</span>
