@@ -32,20 +32,18 @@ const EventHandlers = {
         if (neighborhood) {
             neighborhood.addEventListener('change', (e) => {
                 const selectedNeighborhood = e.target.value;
-                const city = Utils.getElementValue('citySelect');
+                const city = AppState.getCity();
                 
                 Utils.setElementValue('filterNeighborhood', selectedNeighborhood);
-                if (selectedNeighborhood) {
-                    displayResults(city, selectedNeighborhood);
-                    Utils.updateURL(city, selectedNeighborhood);
-                }
+                displayResults(city, selectedNeighborhood);
+                Utils.updateURL(city, selectedNeighborhood);
             });
         }
         
         const filterNeighborhood = Utils.getElement('filterNeighborhood');
         if (filterNeighborhood) {
             filterNeighborhood.addEventListener('change', (e) => {
-                const city = Utils.getElementValue('filterCity');
+                const city = AppState.getCity();
                 const selectedNeighborhood = e.target.value;
                 
                 Utils.setElementValue('neighborhood', selectedNeighborhood);
