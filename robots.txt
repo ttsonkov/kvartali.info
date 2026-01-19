@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /style.css
+Allow: /data.js
+Allow: /firebase-config.js
+Disallow: /build/
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Sitemaps
+Sitemap: /sitemap.xml

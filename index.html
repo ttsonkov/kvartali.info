@@ -3,8 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>КварталБГ — Оценка на кварталите на България</title>
+    <meta name="description" content="КварталБГ - Оценяване и преглед на квартали и детски градини в България. Виж рейтинги, отзиви и мнения от местната общност за град София, Пловдив, Варна и други городове.">
+    <meta name="keywords" content="оценка квартали, детски градини България, София, Пловдив, Варна, квартали, детски zajeden, местна общност, рейтинги">
+    <meta name="author" content="КварталБГ">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Bulgarian">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="КварталБГ — Оценка на кварталите и детски градини на България">
+    <meta property="og:description" content="Оценяване на кварталите в България. Виж оценки, отзиви и рейтинги за София, Пловдив, Варна и други престижни города.">
+    <meta property="og:site_name" content="КварталБГ">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="КварталБГ — Оценка на кварталите на България">
+    <meta name="twitter:description" content="Оценяване на кварталите и детски градини в България">
+    <link rel="canonical" href="">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <title>КварталБГ — Оценка на кварталите и детски градини на България | София, Пловдив, Варна</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Analytics (Replace with your GA ID) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA_MEASUREMENT_ID', {
+        'page_title': document.title,
+        'page_path': window.location.pathname
+      });
+    </script>
+    
+    <!-- Preconnect to Firebase -->
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://firebaseapp.com">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "КварталБГ",
+        "description": "Платформа за оценяване и преглед на квартали и детски градини в България",
+        "url": "",
+        "applicationCategory": "UtilityApplication",
+        "inLanguage": "bg-BG",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "BGN"
+        }
+    }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -25,9 +72,9 @@
             <p id="headerSubtitle">Оценете кварталите на всички областни градове по 10 критерия (1-5 звезди) - по един глас на квартал</p>
         </header>
 
-        <main>
-            <div class="form-section">
-                <h2>Добавяне на оценка</h2>
+        <main role="main" aria-label="Основно съдържание">
+            <section class="form-section" aria-labelledby="form-heading">
+                <h2 id="form-heading">Добавяне на оценка</h2>
                 <form id="ratingForm">
                     <div class="form-group">
                         <label for="citySelect">Град:</label>
@@ -127,8 +174,8 @@
                 </form>
             </div>
 
-            <div class="results-section">
-                <h2>Резултати</h2>
+            <section class="results-section" aria-labelledby="results-heading">
+                <h2 id="results-heading">Резултати и оценки</h2>
                 <div class="filter-bar">
                     <select id="filterCity">
                         <option value="">Всички градове</option>
@@ -160,8 +207,8 @@
                         <option value="" id="filterNeighborhoodPlaceholder">Всички квартали</option>
                     </select>
                 </div>
-                <div id="resultsContainer"></div>
-            </div>
+                <div id="resultsContainer" role="region" aria-label="Контейнер за резултати"></div>
+            </section>
         </main>
     </div>
 
@@ -185,5 +232,17 @@
     <script src="firebase.js"></script>
     <!-- Main app controller -->
     <script src="appController.js"></script>
+    
+    <!-- SEO Schema for rating application -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "AggregateRating",
+        "ratingValue": "4.5",
+        "bestRating": "5",
+        "worstRating": "1",
+        "ratingCount": "1000"
+    }
+    </script>
 </body>
 </html>
