@@ -1,9 +1,8 @@
-// UI Controller (Single Responsibility - UI Updates)
+﻿// UI Controller (Single Responsibility - UI Updates)
 const UIController = {
     // Update city display
     updateCityDisplay(city) {
-        Utils.setElementValue('citySelect', city);
-        Utils.setElementValue('filterCity', city);
+
         updateHeaderCity(city);
     },
     
@@ -42,7 +41,7 @@ const UIController = {
             neighborhoodPlaceholder: isChildcare ? 'Изберете детска градина...' : 'Изберете квартал...',
             filterNeighborhoodPlaceholder: isChildcare ? 'Всички детски градини' : 'Всички квартали',
             headerSubtitle: isChildcare 
-                ? 'Оцени детските градини и ясли и дай мнение за тях.'
+                ? `Оцени детските градини и ясли на град ${AppState.getCity()} и дай мнение за тях.`
                 : 'Оценете кварталите на всички областни градове по 10 критерия'
         };
         

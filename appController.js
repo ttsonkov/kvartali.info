@@ -1,4 +1,4 @@
-// Application Controller (Orchestrates everything - Facade Pattern)
+﻿// Application Controller (Orchestrates everything - Facade Pattern)
 const AppController = {
     // Initialize application
     init() {
@@ -51,6 +51,7 @@ const AppController = {
         AppState.setCity(newCity);
         
         UIController.updateCityDisplay(newCity);
+        UIController.updateLocationTypeUI(AppState.getLocationType());
         populateSelectOptions(newCity, newCity);
         
         const neighborhoodFilter = Utils.getElementValue('filterNeighborhood') || '';
@@ -70,7 +71,7 @@ const AppController = {
         UIController.updateLocationTypeUI(type);
         
         // Repopulate selectors
-        const city = Utils.getElementValue('citySelect') || AppState.getCity();
+        const city = AppState.getCity();
         populateSelectOptions(city, city);
         
         // Clear form

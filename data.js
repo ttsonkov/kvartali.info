@@ -1,4 +1,4 @@
-// City neighborhoods data - ALL BULGARIAN REGIONAL CITIES AND NEIGHBORHOODS (SORTED)
+﻿// City neighborhoods data - ALL BULGARIAN REGIONAL CITIES AND NEIGHBORHOODS (SORTED)
 // Order: Sofia, Plovdiv, Varna, Burgas, then remaining 18 cities alphabetically
 const cityNeighborhoods = {
     "София": [
@@ -884,7 +884,19 @@ const childcareNeighborhoods = {
         "ДГ №68 Патиланско царство"
     ],
     "Търговище": [
-        "ДГ 'Здравец' - Център"
+        "ДГ 'Здравец' - Център",
+        "ДГ Веселушко",
+        "ДГ Здравец",
+        "ДГ Червената шапчица",
+        "ДГ Осми март",
+        "ДГ Приказка",
+        "ДГ Първи юни",
+        "ДГ Пролет",
+        "ДГ Радост",
+        "ДГ Славейче",
+        "ДГ Снежанка",
+        "ДГ Слънце",
+        "ДГ Пчелица"
     ],
     "Хасково": [
         "ДГ 8-ми март",
@@ -933,4 +945,7 @@ const childcareNeighborhoods = {
 // Derived data
 const cityList = Object.keys(cityNeighborhoods);
 const allNeighborhoods = Object.values(cityNeighborhoods).flat();
+
+
+
 

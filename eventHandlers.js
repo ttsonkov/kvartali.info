@@ -1,9 +1,8 @@
-// Event Handlers (Single Responsibility - User Interactions)
+﻿// Event Handlers (Single Responsibility - User Interactions)
 const EventHandlers = {
     // Setup all event listeners
     setupAll() {
         this.setupLocationTypeButtons();
-        this.setupCitySelectors();
         this.setupNeighborhoodSelectors();
         this.setupHeaderMenu();
         this.setupBrowserNavigation();
@@ -27,21 +26,6 @@ const EventHandlers = {
         }
     },
     
-    setupCitySelectors() {
-        const citySelect = Utils.getElement('citySelect');
-        if (citySelect) {
-            citySelect.addEventListener('change', (e) => {
-                AppController.selectCity(e.target.value);
-            });
-        }
-        
-        const filterCity = Utils.getElement('filterCity');
-        if (filterCity) {
-            filterCity.addEventListener('change', (e) => {
-                AppController.selectCity(e.target.value || AppState.getCity());
-            });
-        }
-    },
     
     setupNeighborhoodSelectors() {
         const neighborhood = Utils.getElement('neighborhood');

@@ -1,4 +1,4 @@
-// Main application logic
+﻿// Main application logic
 
 // Toast notification (moved here to be available early)
 function showToast(message, type = 'success') {
@@ -168,7 +168,7 @@ function setLocationType(type) {
         filterNeighborhoodPlaceholder.textContent = 'Всички детски градини';
         opinionTextarea.placeholder = 'Напишете вашето мнение за детската градина...';
         if (headerSubtitle) {
-            headerSubtitle.textContent = 'Оцени детските градини и ясли и дай мнение за тях.';
+            headerSubtitle.textContent = `Оцени детските градини и ясли на град ${currentCity} и дай мнение за тях.`;
         }
         // Show childcare criteria, hide neighborhood criteria
         document.getElementById('neighborhoodCriteria').style.display = 'none';

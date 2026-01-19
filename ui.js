@@ -129,9 +129,9 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
     // Filter by location type
     filteredRatings = filteredRatings.filter(r => (r.locationType || 'neighborhood') === AppState.getLocationType());
     
-    if (cityFilter) {
-        filteredRatings = filteredRatings.filter(r => (r.city || 'София') === cityFilter);
-    }
+    // Always filter by current city
+    const city = cityFilter || AppState.getCity();
+    filteredRatings = filteredRatings.filter(r => (r.city || 'София') === city);
     if (neighborhoodFilter) {
         filteredRatings = filteredRatings.filter(r => r.neighborhood === neighborhoodFilter);
     }
