@@ -1,5 +1,20 @@
 ﻿// Event Handlers (Single Responsibility - User Interactions)
 const EventHandlers = {
+    // Helper to get base domain (e.g., 'kvartali.eu' or 'localhost')
+    getBaseDomain() {
+        const hostname = window.location.hostname.toLowerCase();
+        // If it's localhost, return 'localhost'
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return 'localhost';
+        }
+        // If it's a subdomain (gradini.kvartali.eu, lekari.kvartali.eu), extract base domain
+        if (hostname.includes('gradini.') || hostname.includes('lekari.')) {
+            return hostname.replace(/^(www\.)?(gradini\.|lekari\.)/, '');
+        }
+        // Otherwise return as is (kvartali.eu, www.kvartali.eu)
+        return hostname.replace(/^www\./, '');
+    },
+    
     // Setup all event listeners
     setupAll() {
         this.setupLocationTypeButtons();
@@ -16,19 +31,52 @@ const EventHandlers = {
         
         if (btnNeighborhoods) {
             btnNeighborhoods.addEventListener('click', () => {
-                AppController.setLocationType('neighborhood');
+                // Redirect to main domain only if on subdomain
+                const hostname = window.location.hostname.toLowerCase();
+                if (hostname.includes('gradini.') || hostname.includes('lekari.')) {
+                    const city = AppState.getCity();
+                    const params = new URLSearchParams();
+                    if (city) params.set('city', city);
+                    const baseDomain = this.getBaseDomain();
+                    const newURL = `${window.location.protocol}//${baseDomain}${window.location.port ? ':' + window.location.port : ''}/${params.toString() ? '?' + params.toString() : ''}`;
+                    window.location.href = newURL;
+                } else {
+                    AppController.setLocationType('neighborhood');
+                }
             });
         }
         
         if (btnChildcare) {
             btnChildcare.addEventListener('click', () => {
-                AppController.setLocationType('childcare');
+                // Redirect to gradini subdomain if not already there
+                const hostname = window.location.hostname.toLowerCase();
+                if (!hostname.includes('gradini.')) {
+                    const city = AppState.getCity();
+                    const params = new URLSearchParams();
+                    if (city) params.set('city', city);
+                    const baseDomain = this.getBaseDomain();
+                    const newURL = `${window.location.protocol}//gradini.${baseDomain}${window.location.port ? ':' + window.location.port : ''}/${params.toString() ? '?' + params.toString() : ''}`;
+                    window.location.href = newURL;
+                } else {
+                    AppController.setLocationType('childcare');
+                }
             });
         }
         
         if (btnDoctors) {
             btnDoctors.addEventListener('click', () => {
-                AppController.setLocationType('doctors');
+                // Redirect to lekari subdomain if not already there
+                const hostname = window.location.hostname.toLowerCase();
+                if (!hostname.includes('lekari.')) {
+                    const city = AppState.getCity();
+                    const params = new URLSearchParams();
+                    if (city) params.set('city', city);
+                    const baseDomain = this.getBaseDomain();
+                    const newURL = `${window.location.protocol}//lekari.${baseDomain}${window.location.port ? ':' + window.location.port : ''}/${params.toString() ? '?' + params.toString() : ''}`;
+                    window.location.href = newURL;
+                } else {
+                    AppController.setLocationType('doctors');
+                }
             });
         }
     },

@@ -22,10 +22,19 @@ const Utils = {
     
     // URL Management
     updateURL(city, neighborhood = '', type = 'neighborhood') {
+        const hostname = window.location.hostname.toLowerCase();
+        const isGradiniDomain = hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+        const isDoctorsDomain = hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+        
         const params = new URLSearchParams();
         if (city) params.set('city', city);
         if (neighborhood) params.set('neighborhood', neighborhood);
-        if (type && type !== 'neighborhood') params.set('type', type);
+        
+        // Don't add type parameter if we're on the corresponding subdomain
+        const shouldAddType = type && type !== 'neighborhood' && 
+                              !((type === 'childcare' && isGradiniDomain) || 
+                                (type === 'doctors' && isDoctorsDomain));
+        if (shouldAddType) params.set('type', type);
         
         const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
         window.history.pushState({ city, neighborhood, type }, '', newURL);
@@ -33,10 +42,23 @@ const Utils = {
     
     getURLParams() {
         const params = new URLSearchParams(window.location.search);
+        const hostname = window.location.hostname.toLowerCase();
+        const isKindergartenDomain = hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+        const isDoctorsDomain = hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+        
+        let type = params.get('type') || 'neighborhood';
+        
+        // Override type based on subdomain
+        if (isKindergartenDomain) {
+            type = 'childcare';
+        } else if (isDoctorsDomain) {
+            type = 'doctors';
+        }
+        
         return {
             city: params.get('city') || 'София',
             neighborhood: params.get('neighborhood') || '',
-            type: params.get('type') || 'neighborhood'
+            type: type
         };
     },
     

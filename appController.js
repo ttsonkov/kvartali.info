@@ -1,5 +1,17 @@
 ﻿// Application Controller (Orchestrates everything - Facade Pattern)
 const AppController = {
+    // Detect if running on gradini subdomain
+    isKindergartenDomain() {
+        const hostname = window.location.hostname.toLowerCase();
+        return hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+    },
+    
+    // Detect if running on lekari subdomain
+    isDoctorsDomain() {
+        const hostname = window.location.hostname.toLowerCase();
+        return hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+    },
+    
     // Initialize application
     init() {
         // Initialize services
@@ -16,8 +28,12 @@ const AppController = {
         const urlParams = Utils.getURLParams();
         AppState.setCity(urlParams.city);
         
-        // Set location type from URL if present
-        if (urlParams.type && urlParams.type !== 'neighborhood') {
+        // Set location type: prioritize subdomain, then URL param
+        if (this.isKindergartenDomain()) {
+            AppState.setLocationType('childcare');
+        } else if (this.isDoctorsDomain()) {
+            AppState.setLocationType('doctors');
+        } else if (urlParams.type && urlParams.type !== 'neighborhood') {
             AppState.setLocationType(urlParams.type);
         }
         
@@ -28,12 +44,31 @@ const AppController = {
         populateSelectOptions(AppState.getCity(), AppState.getCity());
         updateHeaderCity(AppState.getCity());
         
+        // Update page branding based on subdomain
+        if (this.isKindergartenDomain()) {
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle) {
+                const titleSpan = pageTitle.querySelector('span:first-child');
+                if (titleSpan) titleSpan.textContent = '🏫 Детски градини:';
+            }
+            document.title = 'Детски градини на България - Оценки и мнения | GradiniEU';
+        } else if (this.isDoctorsDomain()) {
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle) {
+                const titleSpan = pageTitle.querySelector('span:first-child');
+                if (titleSpan) titleSpan.textContent = '⚕️ Лекари:';
+            }
+            document.title = 'Лекари на България - Оценки и мнения | DoctorsEU';
+        }
+        
         // Setup event listeners
         EventHandlers.setupAll();
         
-        // Apply location type from URL after UI is set up
-        if (urlParams.type === 'childcare') {
+        // Apply location type from URL or subdomain after UI is set up
+        if (this.isKindergartenDomain() || urlParams.type === 'childcare') {
             this.setLocationType('childcare');
+        } else if (this.isDoctorsDomain() || urlParams.type === 'doctors') {
+            this.setLocationType('doctors');
         }
         
         // Initialize Firebase

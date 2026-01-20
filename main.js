@@ -32,6 +32,18 @@ let currentCity = "София";
 let currentRatings = {};
 let currentLocationType = "neighborhood"; // 'neighborhood' or 'childcare'
 
+// Detect if running on kindergarten subdomain
+function isKindergartenDomain() {
+    const hostname = window.location.hostname.toLowerCase();
+    return hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+}
+
+// Detect if running on lekari subdomain
+function isDoctorsDomain() {
+    const hostname = window.location.hostname.toLowerCase();
+    return hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+}
+
 // Vote key includes location type to distinguish childcare from neighborhoods
 const makeVoteKey = (city, neighborhood, type = "neighborhood") => `${type}::${city || 'София'}::${neighborhood}`;
 
@@ -104,10 +116,19 @@ const getNeighborhoodsForCity = (city) => {
 
 // URL management
 function updateURL(city, neighborhood = '', type = 'neighborhood') {
+    const hostname = window.location.hostname.toLowerCase();
+    const isGradiniDomain = hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+    const isDoctorsDomain = hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+    
     const params = new URLSearchParams();
     if (city) params.set('city', city);
     if (neighborhood) params.set('neighborhood', neighborhood);
-    if (type && type !== 'neighborhood') params.set('type', type);
+    
+    // Don't add type parameter if we're on the corresponding subdomain
+    const shouldAddType = type && type !== 'neighborhood' && 
+                          !((type === 'childcare' && isGradiniDomain) || 
+                            (type === 'doctors' && isDoctorsDomain));
+    if (shouldAddType) params.set('type', type);
     
     const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
     window.history.pushState({ city, neighborhood, type }, '', newURL);
@@ -115,10 +136,19 @@ function updateURL(city, neighborhood = '', type = 'neighborhood') {
 
 function getURLParams() {
     const params = new URLSearchParams(window.location.search);
+    let type = params.get('type') || 'neighborhood';
+    
+    // Override type based on subdomain
+    if (isKindergartenDomain()) {
+        type = 'childcare';
+    } else if (isDoctorsDomain()) {
+        type = 'doctors';
+    }
+    
     return {
         city: params.get('city') || 'София',
         neighborhood: params.get('neighborhood') || '',
-        type: params.get('type') || 'neighborhood'
+        type: type
     };
 }
 
