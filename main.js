@@ -35,13 +35,15 @@ let currentLocationType = "neighborhood"; // 'neighborhood' or 'childcare'
 // Detect if running on kindergarten subdomain
 function isKindergartenDomain() {
     const hostname = window.location.hostname.toLowerCase();
-    return hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+    return hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu' ||
+           hostname === 'gradini.localhost' || hostname === 'www.gradini.localhost';
 }
 
 // Detect if running on lekari subdomain
 function isDoctorsDomain() {
     const hostname = window.location.hostname.toLowerCase();
-    return hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+    return hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu' ||
+           hostname === 'lekari.localhost' || hostname === 'www.lekari.localhost';
 }
 
 // Vote key includes location type to distinguish childcare from neighborhoods
@@ -116,19 +118,10 @@ const getNeighborhoodsForCity = (city) => {
 
 // URL management
 function updateURL(city, neighborhood = '', type = 'neighborhood') {
-    const hostname = window.location.hostname.toLowerCase();
-    const isGradiniDomain = hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
-    const isDoctorsDomain = hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
-    
     const params = new URLSearchParams();
     if (city) params.set('city', city);
     if (neighborhood) params.set('neighborhood', neighborhood);
-    
-    // Don't add type parameter if we're on the corresponding subdomain
-    const shouldAddType = type && type !== 'neighborhood' && 
-                          !((type === 'childcare' && isGradiniDomain) || 
-                            (type === 'doctors' && isDoctorsDomain));
-    if (shouldAddType) params.set('type', type);
+    if (type && type !== 'neighborhood') params.set('type', type);
     
     const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname;
     window.history.pushState({ city, neighborhood, type }, '', newURL);

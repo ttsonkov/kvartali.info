@@ -3,13 +3,15 @@ const AppController = {
     // Detect if running on gradini subdomain
     isKindergartenDomain() {
         const hostname = window.location.hostname.toLowerCase();
-        return hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu';
+        return hostname === 'gradini.kvartali.eu' || hostname === 'www.gradini.kvartali.eu' ||
+               hostname === 'gradini.localhost' || hostname === 'www.gradini.localhost';
     },
     
     // Detect if running on lekari subdomain
     isDoctorsDomain() {
         const hostname = window.location.hostname.toLowerCase();
-        return hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu';
+        return hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu' ||
+               hostname === 'lekari.localhost' || hostname === 'www.lekari.localhost';
     },
     
     // Initialize application
@@ -28,21 +30,31 @@ const AppController = {
         const urlParams = Utils.getURLParams();
         AppState.setCity(urlParams.city);
         
-        // Set location type: prioritize subdomain, then URL param
+        // Determine location type: prioritize subdomain, then URL param
+        let locationType = 'neighborhood';
         if (this.isKindergartenDomain()) {
-            AppState.setLocationType('childcare');
+            locationType = 'childcare';
         } else if (this.isDoctorsDomain()) {
-            AppState.setLocationType('doctors');
+            locationType = 'doctors';
         } else if (urlParams.type && urlParams.type !== 'neighborhood') {
-            AppState.setLocationType(urlParams.type);
+            locationType = urlParams.type;
         }
+        
+        // Set location type BEFORE any UI initialization
+        AppState.setLocationType(locationType);
+        console.log('Initial location type set to:', AppState.getLocationType());
         
         // Initialize UI
         UIController.updateCityDisplay(AppState.getCity());
         UIController.initStarRatings();
         buildHeaderCityMenu();
-        populateSelectOptions(AppState.getCity(), AppState.getCity());
         updateHeaderCity(AppState.getCity());
+        
+        // Populate selects based on location type
+        populateSelectOptions(AppState.getCity(), AppState.getCity());
+        
+        // Update UI for the current location type
+        UIController.updateLocationTypeUI(locationType);
         
         // Update page branding based on subdomain
         if (this.isKindergartenDomain()) {
@@ -64,12 +76,12 @@ const AppController = {
         // Setup event listeners
         EventHandlers.setupAll();
         
-        // Apply location type from URL or subdomain after UI is set up
-        if (this.isKindergartenDomain() || urlParams.type === 'childcare') {
-            this.setLocationType('childcare');
-        } else if (this.isDoctorsDomain() || urlParams.type === 'doctors') {
-            this.setLocationType('doctors');
-        }
+        // Display results for the current location type
+        displayResults(AppState.getCity(), '');
+        updateNeighborhoodOptions();
+        
+        // Update URL with the correct type parameter
+        Utils.updateURL(AppState.getCity(), urlParams.neighborhood || '', locationType);
         
         // Initialize Firebase
         if (typeof firebase !== 'undefined') {
