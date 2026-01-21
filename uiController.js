@@ -29,14 +29,17 @@ const UIController = {
     updateLocationTypeUI(type) {
         const isChildcare = type === 'childcare';
         const isDoctors = type === 'doctors';
+        const isDentists = type === 'dentists';
         
         // Toggle buttons
         const btnNeighborhoods = Utils.getElement('btnNeighborhoods');
         const btnChildcare = Utils.getElement('btnChildcare');
         const btnDoctors = Utils.getElement('btnDoctors');
-        if (btnNeighborhoods) btnNeighborhoods.classList.toggle('active', !isChildcare && !isDoctors);
+        const btnDentists = Utils.getElement('btnDentists');
+        if (btnNeighborhoods) btnNeighborhoods.classList.toggle('active', !isChildcare && !isDoctors && !isDentists);
         if (btnChildcare) btnChildcare.classList.toggle('active', isChildcare);
         if (btnDoctors) btnDoctors.classList.toggle('active', isDoctors);
+        if (btnDentists) btnDentists.classList.toggle('active', isDentists);
         
         // Show/hide form groups
         const neighborhoodGroup = Utils.getElement('neighborhood')?.closest('.form-group');
@@ -46,25 +49,37 @@ const UIController = {
         const specialtyGroup = Utils.getElement('specialtyGroup');
         const specialtyField = Utils.getElement('specialty');
         
-        if (neighborhoodGroup) neighborhoodGroup.style.display = isDoctors ? 'none' : 'block';
-        if (neighborhoodSelect) neighborhoodSelect.required = !isDoctors;
+        if (neighborhoodGroup) neighborhoodGroup.style.display = (isDoctors || isDentists) ? 'none' : 'block';
+        if (neighborhoodSelect) neighborhoodSelect.required = !(isDoctors || isDentists);
         
-        if (doctorNameGroup) doctorNameGroup.style.display = isDoctors ? 'block' : 'none';
-        if (doctorNameField) doctorNameField.required = isDoctors;
+        if (doctorNameGroup) doctorNameGroup.style.display = (isDoctors || isDentists) ? 'block' : 'none';
+        if (doctorNameField) doctorNameField.required = (isDoctors || isDentists);
         
+        // Specialty only for doctors, not for dentists
         if (specialtyGroup) specialtyGroup.style.display = isDoctors ? 'block' : 'none';
         if (specialtyField) specialtyField.required = isDoctors;
+        
+        // Update doctor name field label and placeholder based on type
+        const doctorNameLabel = doctorNameGroup?.querySelector('label');
+        if (doctorNameLabel) {
+            doctorNameLabel.textContent = isDentists ? 'Име на зъболекар:' : 'Име на лекар:';
+        }
+        if (doctorNameField) {
+            doctorNameField.placeholder = isDentists ? 'Въведете име на зъболекар...' : 'Въведете име на лекар...';
+        }
         
         // Update labels and placeholders
         const labels = {
             neighborhoodLabel: isChildcare ? 'Детска градина/ясла:' : 'Квартал:',
             neighborhoodPlaceholder: isChildcare ? 'Изберете детска градина...' : 'Изберете квартал...',
-            filterNeighborhoodPlaceholder: isDoctors ? 'Всички специалности' : (isChildcare ? 'Всички детски градини' : 'Всички квартали'),
+            filterNeighborhoodPlaceholder: isDoctors ? 'Всички специалности' : (isDentists ? 'Всички зъболекари' : (isChildcare ? 'Всички детски градини' : 'Всички квартали')),
             headerSubtitle: isDoctors
                 ? `Оцени лекарите на град ${AppState.getCity()} и дай мнение за тях.`
-                : (isChildcare 
-                    ? `Оцени детските градини и ясли на град ${AppState.getCity()} и дай мнение за тях.`
-                    : 'Оценете кварталите на всички областни градове по 10 критерия')
+                : (isDentists
+                    ? `Оцени зъболекарите на град ${AppState.getCity()} и дай мнение за тях.`
+                    : (isChildcare 
+                        ? `Оцени детските градини и ясли на град ${AppState.getCity()} и дай мнение за тях.`
+                        : 'Оценете кварталите на всички областни градове по 10 критерия'))
         };
         
         Object.entries(labels).forEach(([id, text]) => {
@@ -77,16 +92,18 @@ const UIController = {
         if (opinion) {
             opinion.placeholder = isDoctors
                 ? 'Напишете вашето мнение за лекаря...'
-                : (isChildcare 
-                    ? 'Напишете вашето мнение за детската градина...'
-                    : 'Напишете вашето мнение за квартала...');
+                : (isDentists
+                    ? 'Напишете вашето мнение за зъболекаря...'
+                    : (isChildcare 
+                        ? 'Напишете вашето мнение за детската градина...'
+                        : 'Напишете вашето мнение за квартала...'));
         }
         
         // Toggle criteria sections
         const neighborhoodCriteria = Utils.getElement('neighborhoodCriteria');
         const childcareCriteria = Utils.getElement('childcareCriteria');
-        if (neighborhoodCriteria) neighborhoodCriteria.style.display = (isChildcare || isDoctors) ? 'none' : 'grid';
-        if (childcareCriteria) childcareCriteria.style.display = (isChildcare || isDoctors) ? 'grid' : 'none';
+        if (neighborhoodCriteria) neighborhoodCriteria.style.display = (isChildcare || isDoctors || isDentists) ? 'none' : 'grid';
+        if (childcareCriteria) childcareCriteria.style.display = (isChildcare || isDoctors || isDentists) ? 'grid' : 'none';
         
         // Populate specialty dropdown if doctors mode
         if (isDoctors) {

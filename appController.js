@@ -14,6 +14,13 @@ const AppController = {
                hostname === 'lekari.localhost' || hostname === 'www.lekari.localhost';
     },
     
+    // Detect if running on zabolekari subdomain
+    isDentistsDomain() {
+        const hostname = window.location.hostname.toLowerCase();
+        return hostname === 'zabolekari.kvartali.eu' || hostname === 'www.zabolekari.kvartali.eu' ||
+               hostname === 'zabolekari.localhost' || hostname === 'www.zabolekari.localhost';
+    },
+    
     // Initialize application
     init() {
         // Initialize services
@@ -36,6 +43,8 @@ const AppController = {
             locationType = 'childcare';
         } else if (this.isDoctorsDomain()) {
             locationType = 'doctors';
+        } else if (this.isDentistsDomain()) {
+            locationType = 'dentists';
         } else if (urlParams.type && urlParams.type !== 'neighborhood') {
             locationType = urlParams.type;
         }
@@ -71,6 +80,13 @@ const AppController = {
                 if (titleSpan) titleSpan.textContent = '⚕️ Лекари:';
             }
             document.title = 'Лекари на България - Оценки и мнения | DoctorsEU';
+        } else if (this.isDentistsDomain()) {
+            const pageTitle = document.getElementById('pageTitle');
+            if (pageTitle) {
+                const titleSpan = pageTitle.querySelector('span:first-child');
+                if (titleSpan) titleSpan.textContent = '🦷 Зъболекари:';
+            }
+            document.title = 'Зъболекари на България - Оценки и мнения | ZabolekariEU';
         }
         
         // Setup event listeners

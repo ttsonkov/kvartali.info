@@ -7,9 +7,9 @@ const EventHandlers = {
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             return 'localhost';
         }
-        // If it's a subdomain (gradini.kvartali.eu, lekari.kvartali.eu), extract base domain
-        if (hostname.includes('gradini.') || hostname.includes('lekari.')) {
-            return hostname.replace(/^(www\.)?(gradini\.|lekari\.)/, '');
+        // If it's a subdomain (gradini.kvartali.eu, lekari.kvartali.eu, zabolekari.kvartali.eu), extract base domain
+        if (hostname.includes('gradini.') || hostname.includes('lekari.') || hostname.includes('zabolekari.')) {
+            return hostname.replace(/^(www\.)?(gradini\.|lekari\.|zabolekari\.)/, '');
         }
         // Otherwise return as is (kvartali.eu, www.kvartali.eu)
         return hostname.replace(/^www\./, '');
@@ -28,12 +28,13 @@ const EventHandlers = {
         const btnNeighborhoods = Utils.getElement('btnNeighborhoods');
         const btnChildcare = Utils.getElement('btnChildcare');
         const btnDoctors = Utils.getElement('btnDoctors');
+        const btnDentists = Utils.getElement('btnDentists');
         
         if (btnNeighborhoods) {
             btnNeighborhoods.addEventListener('click', () => {
                 // Redirect to main domain only if on subdomain
                 const hostname = window.location.hostname.toLowerCase();
-                if (hostname.includes('gradini.') || hostname.includes('lekari.')) {
+                if (hostname.includes('gradini.') || hostname.includes('lekari.') || hostname.includes('zabolekari.')) {
                     const city = AppState.getCity();
                     const params = new URLSearchParams();
                     if (city) params.set('city', city);
@@ -76,6 +77,23 @@ const EventHandlers = {
                     window.location.href = newURL;
                 } else {
                     AppController.setLocationType('doctors');
+                }
+            });
+        }
+        
+        if (btnDentists) {
+            btnDentists.addEventListener('click', () => {
+                // Redirect to zabolekari subdomain if not already there
+                const hostname = window.location.hostname.toLowerCase();
+                if (!hostname.includes('zabolekari.')) {
+                    const city = AppState.getCity();
+                    const params = new URLSearchParams();
+                    if (city) params.set('city', city);
+                    const baseDomain = this.getBaseDomain();
+                    const newURL = `${window.location.protocol}//zabolekari.${baseDomain}${window.location.port ? ':' + window.location.port : ''}/${params.toString() ? '?' + params.toString() : ''}`;
+                    window.location.href = newURL;
+                } else {
+                    AppController.setLocationType('dentists');
                 }
             });
         }

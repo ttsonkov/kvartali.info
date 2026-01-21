@@ -90,8 +90,8 @@ function populateSelectOptions(formCity = AppState.getCity(), filterCity = Utils
     const select1 = Utils.getElement('neighborhood');
     const select2 = Utils.getElement('filterNeighborhood');
 
-    // Skip populating if in doctors mode
-    if (AppState.getLocationType() === 'doctors') {
+    // Skip populating if in doctors or dentists mode
+    if (AppState.getLocationType() === 'doctors' || AppState.getLocationType() === 'dentists') {
         return;
     }
 

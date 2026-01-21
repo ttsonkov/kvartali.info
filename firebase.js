@@ -109,6 +109,14 @@ async function handleFormSubmit(e) {
             return;
         }
         neighborhood = `${doctorName} (${specialty})`;
+    } else if (locationType === 'dentists') {
+        const doctorName = Utils.getElementValue('doctorName');
+        console.log('Dentist data:', { doctorName });
+        if (!doctorName) {
+            Utils.showToast('Моля въведете име на зъболекар!', 'error');
+            return;
+        }
+        neighborhood = doctorName;
     } else {
         neighborhood = Utils.getElementValue('neighborhood');
         if (!neighborhood) {
@@ -127,9 +135,11 @@ async function handleFormSubmit(e) {
     if (userVotedNeighborhoods.includes(voteKey)) {
         const message = locationType === 'doctors' 
             ? 'Вече сте гласували за този лекар!'
-            : (locationType === 'childcare' 
-                ? 'Вече сте гласували за тази детска градина!' 
-                : 'Вече сте гласували за този квартал!');
+            : (locationType === 'dentists'
+                ? 'Вече сте гласували за този зъболекар!'
+                : (locationType === 'childcare' 
+                    ? 'Вече сте гласували за тази детска градина!' 
+                    : 'Вече сте гласували за този квартал!'));
         Utils.showToast(message, 'error');
         return;
     }
@@ -141,13 +151,13 @@ async function handleFormSubmit(e) {
     
     console.log('Submitting rating:', { locationType, ratings, ratingValues, ratedCount });
     
-    // For childcare and doctors: need 1 rating (overall), for neighborhoods: need all 10
-    const expectedCriteria = (locationType === 'childcare' || locationType === 'doctors') ? 1 : 10;
+    // For childcare, doctors and dentists: need 1 rating (overall), for neighborhoods: need all 10
+    const expectedCriteria = (locationType === 'childcare' || locationType === 'doctors' || locationType === 'dentists') ? 1 : 10;
     const allRated = ratedCount === expectedCriteria;
     const noneRated = ratedCount === 0;
     
     if (!allRated && !noneRated) {
-        const message = (locationType === 'childcare' || locationType === 'doctors')
+        const message = (locationType === 'childcare' || locationType === 'doctors' || locationType === 'dentists')
             ? 'Моля оценете или не оценявайте нито едно!'
             : 'Моля оценете всички 10 критерия или не оценявайте нито един!';
         Utils.showToast(message, 'error');
@@ -179,9 +189,11 @@ async function handleFormSubmit(e) {
         if (existing.exists) {
             const message = locationType === 'doctors' 
                 ? 'Вече сте гласували за този лекар!'
-                : (locationType === 'childcare' 
-                    ? 'Вече сте гласували за тази детска градина!' 
-                    : 'Вече сте гласували за този квартал!');
+                : (locationType === 'dentists'
+                    ? 'Вече сте гласували за този зъболекар!'
+                    : (locationType === 'childcare' 
+                        ? 'Вече сте гласували за тази детска градина!' 
+                        : 'Вече сте гласували за този квартал!'));
             Utils.showToast(message, 'error');
             updateNeighborhoodOptions();
             return;

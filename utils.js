@@ -38,6 +38,8 @@ const Utils = {
                                      hostname === 'gradini.localhost' || hostname === 'www.gradini.localhost';
         const isDoctorsDomain = hostname === 'lekari.kvartali.eu' || hostname === 'www.lekari.kvartali.eu' ||
                                 hostname === 'lekari.localhost' || hostname === 'www.lekari.localhost';
+        const isDentistsDomain = hostname === 'zabolekari.kvartali.eu' || hostname === 'www.zabolekari.kvartali.eu' ||
+                                 hostname === 'zabolekari.localhost' || hostname === 'www.zabolekari.localhost';
         
         let type = params.get('type') || 'neighborhood';
         
@@ -46,6 +48,8 @@ const Utils = {
             type = 'childcare';
         } else if (isDoctorsDomain) {
             type = 'doctors';
+        } else if (isDentistsDomain) {
+            type = 'dentists';
         }
         
         return {

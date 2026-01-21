@@ -46,6 +46,13 @@ function isDoctorsDomain() {
            hostname === 'lekari.localhost' || hostname === 'www.lekari.localhost';
 }
 
+// Detect if running on zabolekari subdomain
+function isDentistsDomain() {
+    const hostname = window.location.hostname.toLowerCase();
+    return hostname === 'zabolekari.kvartali.eu' || hostname === 'www.zabolekari.kvartali.eu' ||
+           hostname === 'zabolekari.localhost' || hostname === 'www.zabolekari.localhost';
+}
+
 // Vote key includes location type to distinguish childcare from neighborhoods
 const makeVoteKey = (city, neighborhood, type = "neighborhood") => `${type}::${city || 'София'}::${neighborhood}`;
 
@@ -136,6 +143,8 @@ function getURLParams() {
         type = 'childcare';
     } else if (isDoctorsDomain()) {
         type = 'doctors';
+    } else if (isDentistsDomain()) {
+        type = 'dentists';
     }
     
     return {
