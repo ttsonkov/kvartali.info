@@ -60,24 +60,22 @@ const SEOEnhancements = {
     updateCanonicalURL() {
         const city = AppState.getCity();
         const locationType = AppState.getLocationType();
+        const citySlug = Utils.transliterate(city);
         
         const baseURL = window.location.origin;
-        const params = new URLSearchParams();
+        let path = '/';
         
-        if (city && city !== 'София') {
-            params.set('city', city);
+        if (locationType === 'childcare') {
+            path = `/detskigradini/${citySlug}`;
+        } else if (locationType === 'doctors') {
+            path = `/lekari/${citySlug}`;
+        } else if (locationType === 'dentists') {
+            path = `/zabolekari/${citySlug}`;
+        } else {
+            path = `/${citySlug}`;
         }
         
-        const hashMap = {
-            'neighborhood': '',
-            'childcare': '#/detskigradini',
-            'doctors': '#/lekari',
-            'dentists': '#/zabolekari'
-        };
-        
-        const queryString = params.toString() ? `?${params.toString()}` : '';
-        const hash = hashMap[locationType] || '';
-        const canonicalURL = `${baseURL}${queryString}${hash}`;
+        const canonicalURL = `${baseURL}${path}`;
         
         let link = document.querySelector('link[rel="canonical"]');
         if (!link) {
