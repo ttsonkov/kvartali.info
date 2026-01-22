@@ -102,6 +102,11 @@ const AppController = {
         hideHeaderMenu();
         
         Utils.updateURL(newCity, neighborhoodFilter, AppState.getLocationType());
+        
+        // Update SEO
+        if (window.SEOEnhancements) {
+            SEOEnhancements.refresh();
+        }
     },
     
     // Location type change handler
@@ -118,6 +123,11 @@ const AppController = {
         Utils.setElementValue('neighborhood', '');
         Utils.setElementValue('filterNeighborhood', '');
         AppState.clearRatings();
+        
+        // Update SEO
+        if (window.SEOEnhancements) {
+            SEOEnhancements.refresh();
+        }
         document.querySelectorAll('.stars span').forEach(star => 
             star.classList.remove('active')
         );
