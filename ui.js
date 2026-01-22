@@ -365,6 +365,11 @@ function renderResultBatch(entries, container) {
             }
         }
     });
+    
+    // Refresh AdSense ads after results are rendered
+    if (typeof AdSenseManager !== 'undefined') {
+        AdSenseManager.refreshAds();
+    }
 }
 // Apply sorting to entries
 function applySorting(entries, sortBy) {
