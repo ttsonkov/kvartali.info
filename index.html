@@ -167,11 +167,57 @@
 
             <section class="results-section" aria-labelledby="results-heading">
                 <h2 id="results-heading">Резултати и мнения</h2>
-                <div class="filter-bar">
-                    <select id="filterNeighborhood">
-                        <option value="" id="filterNeighborhoodPlaceholder">Всички квартали</option>
-                    </select>
+                
+                <!-- Advanced Filtering and Sorting Controls -->
+                <div class="controls-container">
+                    <div class="filter-sort-group">
+                        <!-- Filter by neighborhood -->
+                        <div class="control-item">
+                            <label for="filterNeighborhood">Филтър по квартал:</label>
+                            <select id="filterNeighborhood">
+                                <option value="" id="filterNeighborhoodPlaceholder">Всички квартали</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Sort options -->
+                        <div class="control-item">
+                            <label for="sortBy">Подреди по:</label>
+                            <select id="sortBy">
+                                <option value="rating-desc">Рейтинг (най-висок)</option>
+                                <option value="rating-asc">Рейтинг (най-нисък)</option>
+                                <option value="votes-desc">Брой гласове (най-много)</option>
+                                <option value="votes-asc">Брой гласове (най-малко)</option>
+                                <option value="name-asc">Име (А-Я)</option>
+                                <option value="name-desc">Име (Я-А)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-advanced-group">
+                        <!-- Minimum votes filter -->
+                        <div class="control-item range-control">
+                            <label for="minVotes">
+                                Минимум гласове: <span id="minVotesValue">0</span>
+                            </label>
+                            <input type="range" id="minVotes" min="0" max="20" value="0" step="1">
+                        </div>
+                        
+                        <!-- Minimum rating filter -->
+                        <div class="control-item range-control">
+                            <label for="minRating">
+                                Минимум рейтинг: <span id="minRatingValue">0.0</span>
+                            </label>
+                            <input type="range" id="minRating" min="0" max="5" value="0" step="0.1">
+                        </div>
+                    </div>
+                    
+                    <!-- Results count and reset -->
+                    <div class="control-actions">
+                        <span id="resultsCount" class="results-count">0 резултата</span>
+                        <button type="button" id="resetFilters" class="btn-reset">Нулирай филтрите</button>
+                    </div>
                 </div>
+                
                 <div id="resultsContainer" role="region" aria-label="Контейнер за резултати"></div>
             </section>
         </main>

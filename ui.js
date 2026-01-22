@@ -124,8 +124,8 @@ function populateSelectOptions(formCity = AppState.getCity(), filterCity = Utils
     updateNeighborhoodOptions();
 }
 
-// Display results
-function displayResults(cityFilter = '', neighborhoodFilter = '') {
+// Display results with sorting and advanced filtering
+function displayResults(cityFilter = '', neighborhoodFilter = '', sortBy = 'rating-desc', minVotes = 0, minRating = 0) {
     const container = Utils.getElement('resultsContainer');
     
     // Filter ratings
@@ -201,19 +201,37 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
         }
         return b.totalAvg - a.totalAvg;
     });
-
+    
+    // Apply advanced filters (min votes and min rating)
+    let displayedEntries = sortedEntries.filter(entry => {
+        const voteCount = entry.neighborhoodRatings.length;
+        const rating = entry.totalAvg;
+        return voteCount >= minVotes && rating >= minRating;
+    });
+    
+    // Apply sorting based on user selection
+    displayedEntries = applySorting(displayedEntries, sortBy);
+    
+    // Update results count
+    updateResultsCount(displayedEntries.length);
+    
+    if (displayedEntries.length === 0) {
+        container.innerHTML = '<div class="empty-state">Няма резултати, отговарящи на зададените филтри</div>';
+        return;
+    }
+    
     // Lazy loading implementation with Intersection Observer
     container.innerHTML = '';
     
     // Create placeholder for all items
     const itemsPerPage = 10;
-    const totalPages = Math.ceil(sortedEntries.length / itemsPerPage);
+    const totalPages = Math.ceil(displayedEntries.length / itemsPerPage);
     
     // Render first batch immediately
-    renderResultBatch(sortedEntries.slice(0, itemsPerPage), container);
+    renderResultBatch(displayedEntries.slice(0, itemsPerPage), container);
     
     // Setup lazy loading for remaining items
-    if (sortedEntries.length > itemsPerPage) {
+    if (displayedEntries.length > itemsPerPage) {
         let currentPage = 1;
         
         // Create sentinel element for intersection observer
@@ -227,7 +245,7 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
                 if (entry.isIntersecting && currentPage < totalPages) {
                     const start = currentPage * itemsPerPage;
                     const end = start + itemsPerPage;
-                    const batch = sortedEntries.slice(start, end);
+                    const batch = displayedEntries.slice(start, end);
                     
                     // Remove sentinel temporarily
                     sentinel.remove();
@@ -236,7 +254,7 @@ function displayResults(cityFilter = '', neighborhoodFilter = '') {
                     renderResultBatch(batch, container);
                     
                     // Re-add sentinel if more items exist
-                    if (end < sortedEntries.length) {
+                    if (end < displayedEntries.length) {
                         container.appendChild(sentinel);
                     } else {
                         observer.disconnect();
@@ -337,4 +355,57 @@ function renderResultBatch(entries, container) {
             }
         }
     });
+}
+// Apply sorting to entries
+function applySorting(entries, sortBy) {
+    const sorted = [...entries];
+    
+    switch(sortBy) {
+        case 'rating-desc':
+            return sorted.sort((a, b) => b.totalAvg - a.totalAvg);
+        case 'rating-asc':
+            return sorted.sort((a, b) => a.totalAvg - b.totalAvg);
+        case 'votes-desc':
+            return sorted.sort((a, b) => b.neighborhoodRatings.length - a.neighborhoodRatings.length);
+        case 'votes-asc':
+            return sorted.sort((a, b) => a.neighborhoodRatings.length - b.neighborhoodRatings.length);
+        case 'name-asc':
+            return sorted.sort((a, b) => a.neighborhood.localeCompare(b.neighborhood, 'bg'));
+        case 'name-desc':
+            return sorted.sort((a, b) => b.neighborhood.localeCompare(a.neighborhood, 'bg'));
+        default:
+            return sorted;
+    }
+}
+
+// Update results count display
+function updateResultsCount(count) {
+    const countElement = Utils.getElement('resultsCount');
+    if (countElement) {
+        const text = count === 1 ? '1 резултат' : `${count} резултата`;
+        countElement.textContent = text;
+    }
+}
+
+// Get current filter and sort values
+function getCurrentFilters() {
+    return {
+        cityFilter: AppState.getCity(),
+        neighborhoodFilter: Utils.getElementValue('filterNeighborhood') || '',
+        sortBy: Utils.getElementValue('sortBy') || 'rating-desc',
+        minVotes: parseInt(Utils.getElementValue('minVotes') || 0),
+        minRating: parseFloat(Utils.getElementValue('minRating') || 0)
+    };
+}
+
+// Trigger filtered display
+function triggerFilteredDisplay() {
+    const filters = getCurrentFilters();
+    displayResults(
+        filters.cityFilter, 
+        filters.neighborhoodFilter, 
+        filters.sortBy, 
+        filters.minVotes, 
+        filters.minRating
+    );
 }
