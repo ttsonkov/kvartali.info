@@ -16,8 +16,18 @@ const AppController = {
         const urlParams = Utils.getURLParams();
         AppState.setCity(urlParams.city);
         
-        // Determine location type from URL params
-        const locationType = urlParams.type || 'neighborhood';
+        // Determine location type based on URL hash
+        let locationType = 'neighborhood';
+        const hash = window.location.hash.toLowerCase();
+        if (hash.includes('detskigradini')) {
+            locationType = 'childcare';
+        } else if (hash.includes('zabolekari')) {
+            locationType = 'dentists';
+        } else if (hash.includes('lekari')) {
+            locationType = 'doctors';
+        } else if (urlParams.type && urlParams.type !== 'neighborhood') {
+            locationType = urlParams.type;
+        }
         
         // Set location type BEFORE any UI initialization
         AppState.setLocationType(locationType);

@@ -29,24 +29,30 @@ const EventHandlers = {
         if (btnChildcare) {
             btnChildcare.addEventListener('click', () => {
                 const city = AppState.getCity();
-                Utils.updateURL(city, '', 'childcare');
-                location.reload();
+                const params = new URLSearchParams();
+                if (city && city !== 'София') params.set('city', city);
+                const queryString = params.toString() ? `?${params.toString()}` : '';
+                window.location.href = `/${queryString}#/detskigradini`;
             });
         }
         
         if (btnDoctors) {
             btnDoctors.addEventListener('click', () => {
                 const city = AppState.getCity();
-                Utils.updateURL(city, '', 'doctors');
-                location.reload();
+                const params = new URLSearchParams();
+                if (city && city !== 'София') params.set('city', city);
+                const queryString = params.toString() ? `?${params.toString()}` : '';
+                window.location.href = `/${queryString}#/lekari`;
             });
         }
         
         if (btnDentists) {
             btnDentists.addEventListener('click', () => {
                 const city = AppState.getCity();
-                Utils.updateURL(city, '', 'dentists');
-                location.reload();
+                const params = new URLSearchParams();
+                if (city && city !== 'София') params.set('city', city);
+                const queryString = params.toString() ? `?${params.toString()}` : '';
+                window.location.href = `/${queryString}#/zabolekari`;
             });
         }
     },

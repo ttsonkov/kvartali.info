@@ -54,8 +54,18 @@ const MobileEnhancements = {
     
     navigateToType(type) {
         const city = AppState.getCity();
-        Utils.updateURL(city, '', type);
-        location.reload();
+        const params = new URLSearchParams();
+        if (city && city !== 'София') params.set('city', city);
+        const queryString = params.toString() ? `?${params.toString()}` : '';
+        
+        const hashMap = {
+            'neighborhood': '',
+            'childcare': '#/detskigradini',
+            'doctors': '#/lekari',
+            'dentists': '#/zabolekari'
+        };
+        
+        window.location.href = `/${queryString}${hashMap[type]}`;
     },
     
     // PWA Install Prompt

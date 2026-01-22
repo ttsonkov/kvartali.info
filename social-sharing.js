@@ -10,27 +10,26 @@ const SocialSharing = {
         const baseURL = window.location.origin;
         const currentCity = city || AppState.getCity();
         const locationType = AppState.getLocationType();
-        const citySlug = Utils.transliterate(currentCity);
         
-        let path = '/';
-        if (locationType === 'childcare') {
-            path = `/detskigradini/${citySlug}`;
-        } else if (locationType === 'doctors') {
-            path = `/lekari/${citySlug}`;
-        } else if (locationType === 'dentists') {
-            path = `/zabolekari/${citySlug}`;
-        } else {
-            path = `/${citySlug}`;
-        }
-        
-        // Add neighborhood as query param if provided
         const params = new URLSearchParams();
-        if (neighborhood) {
-            params.set('q', neighborhood);
+        if (currentCity && currentCity !== 'София') {
+            params.set('city', currentCity);
         }
-        const queryString = params.toString() ? `?${params.toString()}` : '';
+        if (neighborhood) {
+            params.set('location', neighborhood);
+        }
         
-        return `${baseURL}${path}${queryString}`;
+        const hashMap = {
+            'neighborhood': '',
+            'childcare': '#/detskigradini',
+            'doctors': '#/lekari',
+            'dentists': '#/zabolekari'
+        };
+        
+        const queryString = params.toString() ? `?${params.toString()}` : '';
+        const hash = hashMap[locationType] || '';
+        
+        return `${baseURL}${queryString}${hash}`;
     },
     
     // Generate share text
