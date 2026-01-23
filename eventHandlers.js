@@ -82,8 +82,10 @@ const EventHandlers = {
                 const shopNameSelect = Utils.getElement('shopName');
                 if (shopNameSelect && category) {
                     const chains = shopChains[category] || [];
+                    // Sort chains alphabetically using Bulgarian locale
+                    const sortedChains = chains.slice().sort((a, b) => a.localeCompare(b, 'bg'));
                     shopNameSelect.innerHTML = '<option value="">Изберете магазин...</option>' +
-                        chains.map(chain => `<option value="${chain}">${chain}</option>`).join('');
+                        sortedChains.map(chain => `<option value="${chain}">${chain}</option>`).join('');
                     
                     // Show shop name group
                     const shopNameGroup = Utils.getElement('shopNameGroup');
