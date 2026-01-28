@@ -291,39 +291,6 @@ function displayResults(cityFilter = '', neighborhoodFilter = '', sortBy = 'rati
     if (typeof AdSenseManager !== 'undefined' && typeof debouncedRefreshAds !== 'undefined') {
         debouncedRefreshAds();
     }
-    // Default: original layout
-    container.innerHTML = '';
-    const itemsPerPage = 10;
-    const totalPages = Math.ceil(displayedEntries.length / itemsPerPage);
-    renderResultBatch(displayedEntries.slice(0, itemsPerPage), container);
-    if (displayedEntries.length > itemsPerPage) {
-        let currentPage = 1;
-        const sentinel = document.createElement('div');
-        sentinel.className = 'lazy-load-sentinel';
-        sentinel.style.height = '20px';
-        container.appendChild(sentinel);
-        lazyLoadObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && currentPage < totalPages) {
-                    const start = currentPage * itemsPerPage;
-                    const end = start + itemsPerPage;
-                    const batch = displayedEntries.slice(start, end);
-                    sentinel.remove();
-                    renderResultBatch(batch, container);
-                    if (end < displayedEntries.length) {
-                        container.appendChild(sentinel);
-                    } else {
-                        if (lazyLoadObserver) lazyLoadObserver.disconnect();
-                    }
-                    currentPage++;
-                }
-            });
-        }, { rootMargin: '100px' });
-        lazyLoadObserver.observe(sentinel);
-    }
-    if (typeof AdSenseManager !== 'undefined' && typeof debouncedRefreshAds !== 'undefined') {
-        debouncedRefreshAds();
-    }
 }
 
 // Helper function to render a batch of results
