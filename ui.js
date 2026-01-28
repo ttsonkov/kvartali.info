@@ -26,7 +26,9 @@ function updateHeaderCity(city) {
         link.textContent = city;
     }
 }
-window.updateHeaderCity = updateHeaderCity;
+if (typeof window !== 'undefined') {
+    window.updateHeaderCity = updateHeaderCity;
+}
 
 // Header city menu functions
 function buildHeaderCityMenu() {
