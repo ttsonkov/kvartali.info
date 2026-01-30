@@ -288,8 +288,14 @@ function displayResults(cityFilter = '', neighborhoodFilter = '', sortBy = 'rati
         }, { rootMargin: '100px' });
         lazyLoadObserver.observe(sentinel);
     }
+    // Only refresh ads if there is meaningful content
     if (typeof AdSenseManager !== 'undefined' && typeof debouncedRefreshAds !== 'undefined') {
-        debouncedRefreshAds();
+        const container = document.getElementById('resultsContainer');
+        if (container && container.children.length > 0 && container.textContent.trim().length >= 50) {
+            debouncedRefreshAds();
+        } else {
+            if (window.console) console.warn('Ads not refreshed: empty or low-value content.');
+        }
     }
     // Default: original layout
     container.innerHTML = '';
@@ -421,9 +427,14 @@ function renderResultBatch(entries, container) {
         }
     });
     
-    // Refresh AdSense ads after results are rendered
+    // Refresh AdSense ads after results are rendered, only if there is meaningful content
     if (typeof AdSenseManager !== 'undefined') {
-        AdSenseManager.refreshAds();
+        const container = document.getElementById('resultsContainer');
+        if (container && container.children.length > 0 && container.textContent.trim().length >= 50) {
+            AdSenseManager.refreshAds();
+        } else {
+            if (window.console) console.warn('Ads not refreshed: empty or low-value content.');
+        }
     }
 }
 // Apply sorting to entries

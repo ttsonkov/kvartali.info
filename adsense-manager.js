@@ -23,7 +23,11 @@ const AdSenseManager = {
      */
     insertNativeAds(position = 5) {
         const resultsContainer = document.getElementById('resultsContainer');
-        if (!resultsContainer) return;
+        // Prevent ad insertion if no results or low-value content
+        if (!resultsContainer || resultsContainer.children.length === 0 || resultsContainer.textContent.trim().length < 50) {
+            console.warn('AdSenseManager: Not inserting ads due to empty or low-value content.');
+            return;
+        }
         // Defensive: do not insert ads if container or any parent is not visible or has no width
         // Check both offsetWidth and getBoundingClientRect().width for all parents
         function isVisibleAndHasWidth(el) {
